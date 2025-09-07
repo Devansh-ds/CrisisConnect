@@ -1,6 +1,6 @@
-package com.devansh.request;
+package com.devansh.request.auth;
 
-import com.devansh.model.Role;
+import com.devansh.model.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

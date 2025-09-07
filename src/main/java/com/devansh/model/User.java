@@ -1,5 +1,6 @@
 package com.devansh.model;
 
+import com.devansh.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,7 +31,7 @@ public class User implements UserDetails {
     private String phoneNumber;
     private String fullname;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "email_verified")
     private boolean isEmailVerified;
