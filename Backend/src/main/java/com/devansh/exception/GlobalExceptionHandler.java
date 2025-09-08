@@ -69,4 +69,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(SosException.class)
+    public ResponseEntity<ErrorResponse> handleSosException(SosException e, WebRequest request) {
+        ErrorResponse response = ErrorResponse
+                .builder()
+                .errorMessage(e.getMessage())
+                .timestamp(LocalDateTime.now())
+                .endpoint(request.getDescription(false).replace("uri=", ""))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DisasterZoneException.class)
+    public ResponseEntity<ErrorResponse> handleDisasterZoneException(DisasterZoneException e, WebRequest request) {
+        ErrorResponse response = ErrorResponse
+                .builder()
+                .errorMessage(e.getMessage())
+                .timestamp(LocalDateTime.now())
+                .endpoint(request.getDescription(false).replace("uri=", ""))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.devansh.service.impl;
 
 import com.devansh.config.JwtService;
+import com.devansh.exception.TokenInvalidException;
 import com.devansh.exception.UserException;
 import com.devansh.model.User;
 import com.devansh.repo.UserRepository;
@@ -16,7 +17,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    public User findByJwtToken(String token) throws UserException {
+    public User findByJwtToken(String token) throws UserException, TokenInvalidException {
         token = token.substring(7);
         String email = jwtService.extractUsername(token);
         User user = userRepository

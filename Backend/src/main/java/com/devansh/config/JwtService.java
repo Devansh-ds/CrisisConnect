@@ -1,7 +1,9 @@
 package com.devansh.config;
 
 
+import com.devansh.exception.TokenInvalidException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -28,11 +30,11 @@ public class JwtService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
 
-    public String extractUsername(String jwtToken) {
+    public String extractUsername(String jwtToken) throws TokenInvalidException {
         return extractClaim(jwtToken, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String jwtToken, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(String jwtToken, Function<Claims, T> claimsResolver) throws TokenInvalidException {
         final Claims claims = extractAllClaims(jwtToken);
         return claimsResolver.apply(claims);
     }
@@ -63,20 +65,26 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String jwtToken, UserDetails userDetails) {
+    public boolean validateToken(String jwtToken, UserDetails userDetails) throws TokenInvalidException {
         final String username = extractUsername(jwtToken);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(jwtToken);
     }
 
-    private boolean isTokenExpired(String jwtToken) {
+    private boolean isTokenExpired(String jwtToken) throws TokenInvalidException {
         return extractExpiration(jwtToken).before(new Date());
     }
 
-    private Date extractExpiration(String jwtToken) {
+    private Date extractExpiration(String jwtToken) throws TokenInvalidException {
         return extractClaim(jwtToken, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String jwtToken) {
+    private Claims extractAllClaims(String jwtToken) throws TokenInvalidException {
+
+        if (jwtToken == null || jwtToken.isEmpty()) {
+            throw new TokenInvalidException("Token is null or empty");
+        }
+
+        System.out.println("Token: " + jwtToken);
 
         return Jwts
                 .parserBuilder()

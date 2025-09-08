@@ -15,7 +15,8 @@ public record SosRequestDto(
         BigDecimal longitude,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        SosStatus sosStatus
+        SosStatus sosStatus,
+        DisasterZoneDto disasterZoneDto
 ) {
 
 }

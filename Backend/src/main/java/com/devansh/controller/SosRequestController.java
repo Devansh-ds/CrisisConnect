@@ -1,5 +1,6 @@
 package com.devansh.controller;
 
+import com.devansh.exception.TokenInvalidException;
 import com.devansh.exception.UserException;
 import com.devansh.model.User;
 import com.devansh.model.enums.SosStatus;
@@ -24,7 +25,7 @@ public class SosRequestController {
 
     @PostMapping("/sos")
     public ResponseEntity<SosRequestDto> createSosRequest(@RequestBody CreateSosRequest createSosRequest,
-                                           @RequestHeader("Authorization") String token) throws UserException {
+                                           @RequestHeader("Authorization") String token) throws UserException, TokenInvalidException {
         User user = userService.findByJwtToken(token);
         return new ResponseEntity<>(sosRequestService.createSosRequest(createSosRequest, user), HttpStatus.CREATED);
     }
@@ -32,27 +33,27 @@ public class SosRequestController {
     @PutMapping("/sos/{sosId}")
     public ResponseEntity<SosRequestDto> updatePendingRequests(@RequestBody CreateSosRequest createSosRequest,
                                                                @PathVariable Integer sosId,
-                                                               @RequestHeader("Authorization") String token) throws UserException {
+                                                               @RequestHeader("Authorization") String token) throws UserException, TokenInvalidException {
         User user = userService.findByJwtToken(token);
         return new ResponseEntity<>(sosRequestService.updatePendingSosRequest(createSosRequest, sosId, user), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/sos")
-    public ResponseEntity<List<SosRequestDto>> getSosRequests(@RequestHeader("Authorization") String token) throws UserException {
+    public ResponseEntity<List<SosRequestDto>> getSosRequests(@RequestHeader("Authorization") String token) throws UserException, TokenInvalidException {
         User user = userService.findByJwtToken(token);
         return ResponseEntity.ok(sosRequestService.getAllSosRequests(user));
     }
 
     @DeleteMapping("/sos/{sosId}")
     public ResponseEntity<MessageResponse> deleteSosRequest(@PathVariable Integer sosId,
-                                                            @RequestHeader("Authorization") String token) throws UserException {
+                                                            @RequestHeader("Authorization") String token) throws UserException, TokenInvalidException {
         User user = userService.findByJwtToken(token);
         return ResponseEntity.ok(sosRequestService.deletePendingSosRequest(sosId, user));
     }
 
     // admin only
 
-    @GetMapping("/admin/sos/{zoneId}/zone")
+    @GetMapping("/admin/sos")
     public ResponseEntity<List<SosRequestDto>> getAllSosRequests(@RequestParam(required = false) SosStatus status,
                                                                  @RequestParam(required = false) Integer zoneId) throws UserException {
         return ResponseEntity.ok(sosRequestService.getFilteredRequests(status, zoneId));

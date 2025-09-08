@@ -1,5 +1,6 @@
 package com.devansh.config;
 
+import com.devansh.exception.TokenInvalidException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,19 +38,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwtToken = authHeader.substring(7).trim();
-        userEmail = jwtService.extractUsername(jwtToken);
+        try {
+            userEmail = jwtService.extractUsername(jwtToken);
+        } catch (TokenInvalidException e) {
+            throw new RuntimeException(e);
+        }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            if (jwtService.validateToken(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                if (jwtService.validateToken(jwtToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (TokenInvalidException e) {
+                throw new RuntimeException(e);
             }
 
         }
