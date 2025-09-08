@@ -26,9 +26,13 @@ public class SafetyTip {
     private String title;
     private String description;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     private DisasterZone disasterZone;
+
+    public boolean isZoneSpecific() {
+        return disasterZone != null;
+    }
 
 }

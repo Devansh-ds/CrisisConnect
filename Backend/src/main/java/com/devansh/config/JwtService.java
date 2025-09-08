@@ -84,8 +84,6 @@ public class JwtService {
             throw new TokenInvalidException("Token is null or empty");
         }
 
-        System.out.println("Token: " + jwtToken);
-
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSigningKey())
