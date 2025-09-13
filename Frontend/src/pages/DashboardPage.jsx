@@ -7,6 +7,7 @@ import MapOverview from "../components/MapOverview";
 import { ShieldAlert, Activity, Map as MapIcon } from "lucide-react";
 
 function DashboardPage() {
+
   const statCards = [
     { title: "Total Zones", value: "12", subtitle: "Monitored areas", color: "blue", icon: "map" },
     { title: "Active Disasters", value: "3", subtitle: "Ongoing emergencies", color: "yellow", icon: "alert-triangle" },
@@ -26,7 +27,6 @@ function DashboardPage() {
     { location: "Sector 18", message: "Food distribution ongoing", status: "Resolved", time: "11:05 AM" },
     { location: "Sector 5", message: "Communication lines down", status: "Pending", time: "11:50 AM" },
     { location: "Sector 7", message: "Water supply disrupted", status: "Pending", time: "10:10 AM" },
-
   ];
 
   const zoneActivityData = [
@@ -40,18 +40,90 @@ function DashboardPage() {
   ];
 
   const sampleZones = [
-    { id: 1, name: "Mumbai Flood Zone Updated", disasterType: "FLOOD", dangerLevel: "HIGH", centerLatitude: 19.08, centerLongitude: 72.88, radius: 20 },
-    { id: 2, name: "Delhi Heatwave Zone", disasterType: "HEATWAVE", dangerLevel: "LOW", centerLatitude: 28.7041, centerLongitude: 77.1025, radius: 10 },
-    { id: 3, name: "Chennai Cyclone Risk", disasterType: "CYCLONE", dangerLevel: "MEDIUM", centerLatitude: 13.0827, centerLongitude: 80.2707, radius: 15 },
+    {
+      id: 1,
+      name: "Mumbai Flood Zone Updated",
+      disasterType: "FLOOD",
+      dangerLevel: "HIGH",
+      centerLatitude: 19.08,
+      centerLongitude: 72.88,
+      radius: 20,
+    },
+    {
+      id: 2,
+      name: "Delhi Heatwave Zone",
+      disasterType: "HEATWAVE",
+      dangerLevel: "LOW",
+      centerLatitude: 28.7041,
+      centerLongitude: 77.1025,
+      radius: 10,
+    },
+    {
+      id: 3,
+      name: "Chennai Cyclone Risk",
+      disasterType: "CYCLONE",
+      dangerLevel: "MEDIUM",
+      centerLatitude: 13.0827,
+      centerLongitude: 80.2707,
+      radius: 15,
+    },
     { id: 4, name: "Kolkata Flood Watch", disasterType: "FLOOD", dangerLevel: "LOW", centerLatitude: 22.5726, centerLongitude: 88.3639, radius: 8 },
-    { id: 5, name: "Ahmedabad Heat Advisory", disasterType: "HEATWAVE", dangerLevel: "MEDIUM", centerLatitude: 23.0225, centerLongitude: 72.5714, radius: 12 },
-    { id: 6, name: "Bengaluru Urban Flood", disasterType: "FLOOD", dangerLevel: "MEDIUM", centerLatitude: 12.9716, centerLongitude: 77.5946, radius: 10 },
+    {
+      id: 5,
+      name: "Ahmedabad Heat Advisory",
+      disasterType: "HEATWAVE",
+      dangerLevel: "MEDIUM",
+      centerLatitude: 23.0225,
+      centerLongitude: 72.5714,
+      radius: 12,
+    },
+    {
+      id: 6,
+      name: "Bengaluru Urban Flood",
+      disasterType: "FLOOD",
+      dangerLevel: "MEDIUM",
+      centerLatitude: 12.9716,
+      centerLongitude: 77.5946,
+      radius: 10,
+    },
     { id: 7, name: "Hyderabad Heatwave", disasterType: "HEATWAVE", dangerLevel: "LOW", centerLatitude: 17.385, centerLongitude: 78.4867, radius: 9 },
-    { id: 8, name: "Pune Landslide Risk", disasterType: "LANDSLIDE", dangerLevel: "LOW", centerLatitude: 18.5204, centerLongitude: 73.8567, radius: 7 },
-    { id: 9, name: "Jaipur Dust Storm", disasterType: "DUST_STORM", dangerLevel: "MEDIUM", centerLatitude: 26.9124, centerLongitude: 75.7873, radius: 14 },
-    { id: 10, name: "Lucknow Heat Stress", disasterType: "HEATWAVE", dangerLevel: "LOW", centerLatitude: 26.8467, centerLongitude: 80.9462, radius: 6 },
+    {
+      id: 8,
+      name: "Pune Landslide Risk",
+      disasterType: "LANDSLIDE",
+      dangerLevel: "LOW",
+      centerLatitude: 18.5204,
+      centerLongitude: 73.8567,
+      radius: 7,
+    },
+    {
+      id: 9,
+      name: "Jaipur Dust Storm",
+      disasterType: "DUST_STORM",
+      dangerLevel: "MEDIUM",
+      centerLatitude: 26.9124,
+      centerLongitude: 75.7873,
+      radius: 14,
+    },
+    {
+      id: 10,
+      name: "Lucknow Heat Stress",
+      disasterType: "HEATWAVE",
+      dangerLevel: "LOW",
+      centerLatitude: 26.8467,
+      centerLongitude: 80.9462,
+      radius: 6,
+    },
     { id: 11, name: "Surat Flood Alert", disasterType: "FLOOD", dangerLevel: "HIGH", centerLatitude: 21.1702, centerLongitude: 72.8311, radius: 18 },
-    { id: 12, name: "Nagpur Heat Risk", disasterType: "HEATWAVE", dangerLevel: "MEDIUM", centerLatitude: 21.1458, centerLongitude: 79.0882, radius: 11 },
+    {
+      id: 12,
+      name: "Nagpur Heat Risk",
+      disasterType: "HEATWAVE",
+      dangerLevel: "MEDIUM",
+      centerLatitude: 21.1458,
+      centerLongitude: 79.0882,
+      radius: 11,
+    },
     { id: 13, name: "Indore Storm Watch", disasterType: "STORM", dangerLevel: "LOW", centerLatitude: 22.7196, centerLongitude: 75.8577, radius: 9 },
     { id: 14, name: "Bhopal Floodplain", disasterType: "FLOOD", dangerLevel: "LOW", centerLatitude: 23.2599, centerLongitude: 77.4126, radius: 10 },
     { id: 15, name: "Patna River Flood", disasterType: "FLOOD", dangerLevel: "HIGH", centerLatitude: 25.5941, centerLongitude: 85.1376, radius: 16 },
@@ -59,7 +131,6 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Header Section */}
         <section>
@@ -101,7 +172,7 @@ function DashboardPage() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Message</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Status</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Time</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Action</th>
+                      {/* <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Action</th> */}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800">
@@ -188,14 +259,10 @@ function DashboardPage() {
         </section>
 
         {/* Footer */}
-        <footer className="text-center text-sm text-slate-500 py-6">
-          DisasterPWA © 2025 | Built with React + Tailwind
-        </footer>
+        <footer className="text-center text-sm text-slate-500 py-6">DisasterPWA © 2025 | Built with React + Tailwind</footer>
       </main>
     </div>
   );
 }
 
 export default DashboardPage;
-
-

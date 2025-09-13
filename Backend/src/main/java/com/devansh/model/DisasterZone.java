@@ -4,8 +4,10 @@ import com.devansh.model.enums.DangerLevel;
 import com.devansh.model.enums.DisasterType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -27,6 +29,11 @@ public class DisasterZone {
     private BigDecimal centerLatitude;
     private BigDecimal centerLongitude;
     private double radius;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    private boolean isActive;
 
     @Enumerated(EnumType.STRING)
     private DangerLevel dangerLevel;

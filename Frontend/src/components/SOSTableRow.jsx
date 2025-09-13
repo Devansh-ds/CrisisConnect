@@ -68,7 +68,7 @@ function SOSTableRow({ location, message, status, time, onResolve }) {
         </span>
       </td>
       <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-400">{time}</td>
-      <td className="px-4 py-3 text-sm">
+      {/* <td className="px-4 py-3 text-sm">
         <button
           type="button"
           onClick={onResolve}
@@ -76,7 +76,7 @@ function SOSTableRow({ location, message, status, time, onResolve }) {
         >
           Mark Resolved
         </button>
-      </td>
+      </td> */}
     </tr>
   );
 }
