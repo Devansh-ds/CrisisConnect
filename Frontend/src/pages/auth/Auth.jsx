@@ -15,7 +15,7 @@ function Auth() {
 
   // Pre-filled admin credentials
   const adminEmail = "admin@example.com";
-  const adminPassword = "admin123";
+  const adminPassword = "admin";
 
   const isLogin = mode === "login";
   const isRegister = mode === "register";
@@ -37,6 +37,7 @@ function Auth() {
     } else if (isLogin) {
       dispatch(login({ email: userData.email, password: userData.password }));
     } else {
+      dispatch(login({ email: adminEmail, password: adminPassword }));
     }
   };
 

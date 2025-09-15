@@ -23,14 +23,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-    private DisasterZoneRepository disasterZoneRepository;
-    private SosRequestRepository sosRequestRepository;
+    private final DisasterZoneRepository disasterZoneRepository;
+    private final SosRequestRepository sosRequestRepository;
     private final SosRequestMapper sosRequestMapper;
 
     @Override
     public DashboardSummary getDashboardSummary() {
         long totalZones = DisasterType.values().length;
-        long activeDisasters = disasterZoneRepository.count();
+        long activeDisasters = disasterZoneRepository.countByIsActiveTrueOrIsActiveIsNull();
         long criticalZones = disasterZoneRepository.countByDangerLevel(DangerLevel.HIGH);
         long pendingSosRequests = sosRequestRepository.countByStatus(SosStatus.PENDING);
 
@@ -73,7 +73,7 @@ public class DashboardServiceImpl implements DashboardService {
             sosCounts.add(sosCount);
 
             // count zones created/active that day
-            Long disasterCount = disasterZoneRepository.countByCreatedAtBetween(
+            Long disasterCount = disasterZoneRepository.countActiveOrNullCreatedAtBetween(
                     date.atStartOfDay(),
                     date.plusDays(1).atStartOfDay()
             );

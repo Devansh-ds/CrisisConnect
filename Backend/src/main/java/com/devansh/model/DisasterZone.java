@@ -31,9 +31,11 @@ public class DisasterZone {
     private double radius;
 
     @CreationTimestamp
+    @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    private boolean isActive;
+    @Column(nullable = false)
+    private boolean isActive = true;
 
     @Enumerated(EnumType.STRING)
     private DangerLevel dangerLevel;

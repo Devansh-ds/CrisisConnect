@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Plus, X, Pencil, Trash2, Map as MapIcon, Filter, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { createDisasterZone, deleteDisasterZone, getAllDisasterZones, udpateDisasterZone } from "../Redux/DisasterZone/Action.js";
+import { toast } from "sonner";
 
 // Ensure Leaflet default marker icons render in bundlers
 function useLeafletDefaultIcon() {
@@ -23,7 +26,9 @@ const dangerBadgeClass = (level) => {
     MEDIUM: "bg-yellow-900/30 text-yellow-300 ring-yellow-700/40",
     LOW: "bg-green-900/30 text-green-300 ring-green-700/40",
   };
-  return `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${map[level] || "bg-slate-800 text-slate-300 ring-slate-700"}`;
+  return `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+    map[level] || "bg-slate-800 text-slate-300 ring-slate-700"
+  }`;
 };
 
 const circleStyleForDanger = (level) => {
@@ -81,7 +86,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -91,31 +96,31 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
         for (let i = 1; i <= 4; i++) {
           pages.push(i);
         }
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
           pages.push(i);
         }
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
   return (
     <>
-      <style jsx>{`
+      <style>{`
         .pagination-container {
           --background: 0 0% 3.9%;
           --foreground: 0 0% 98%;
@@ -147,22 +152,22 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">Go to previous page</span>
         </button>
-        
+
         {getPageNumbers().map((page, index) => (
           <button
             key={index}
-            onClick={() => typeof page === 'number' && onPageChange(page)}
-            disabled={page === '...'}
+            onClick={() => typeof page === "number" && onPageChange(page)}
+            disabled={page === "..."}
             className={`inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border h-10 w-10 ${
               page === currentPage
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600'
-                : 'bg-slate-900 hover:bg-slate-800 hover:text-slate-100 border-slate-700 text-slate-300'
-            } ${page === '...' ? 'cursor-default' : 'cursor-pointer'}`}
+                ? "bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600"
+                : "bg-slate-900 hover:bg-slate-800 hover:text-slate-100 border-slate-700 text-slate-300"
+            } ${page === "..." ? "cursor-default" : "cursor-pointer"}`}
           >
             {page}
           </button>
         ))}
-        
+
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
@@ -179,21 +184,22 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 function DisasterZonesPage() {
   useLeafletDefaultIcon();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // list all disaster zones
+  const disasterStore = useSelector((store) => store.disasterStore);
+  useEffect(() => {
+    dispatch(getAllDisasterZones());
+  }, [dispatch]);
 
   // Placeholder dataset
-  const [zones, setZones] = useState([
-    { id: 1, name: "Mumbai Flood Zone", disasterType: "FLOOD", dangerLevel: "HIGH", centerLatitude: 19.076, centerLongitude: 72.8777, radius: 20 },
-    { id: 2, name: "Delhi Heatwave Zone", disasterType: "HEATWAVE", dangerLevel: "LOW", centerLatitude: 28.7041, centerLongitude: 77.1025, radius: 10 },
-    { id: 3, name: "Chennai Cyclone Risk", disasterType: "CYCLONE", dangerLevel: "MEDIUM", centerLatitude: 13.0827, centerLongitude: 80.2707, radius: 15 },
-    { id: 4, name: "Kolkata Earthquake Zone", disasterType: "EARTHQUAKE", dangerLevel: "HIGH", centerLatitude: 22.5726, centerLongitude: 88.3639, radius: 12 },
-    { id: 5, name: "Ahmedabad Drought Area", disasterType: "DROUGHT", dangerLevel: "MEDIUM", centerLatitude: 23.0225, centerLongitude: 72.5714, radius: 25 },
-    { id: 6, name: "Bengaluru Urban Flood Risk", disasterType: "FLOOD", dangerLevel: "LOW", centerLatitude: 12.9716, centerLongitude: 77.5946, radius: 8 },
-    { id: 7, name: "Hyderabad Heatwave Warning", disasterType: "HEATWAVE", dangerLevel: "HIGH", centerLatitude: 17.385, centerLongitude: 78.4867, radius: 18 },
-    { id: 8, name: "Assam Flood-Prone Area", disasterType: "FLOOD", dangerLevel: "HIGH", centerLatitude: 26.2006, centerLongitude: 92.9376, radius: 30 },
-    { id: 9, name: "Rajasthan Desert Drought", disasterType: "DROUGHT", dangerLevel: "LOW", centerLatitude: 27.0238, centerLongitude: 74.2179, radius: 40 },
-    { id: 10, name: "Uttarakhand Landslide Zone", disasterType: "LANDSLIDE", dangerLevel: "MEDIUM", centerLatitude: 30.0668, centerLongitude: 79.0193, radius: 22 },
-  ]);
-  
+  const [zones, setZones] = useState([]);
+
+  useEffect(() => {
+    if (disasterStore?.allZones) {
+      setZones(disasterStore.allZones);
+    }
+  }, [disasterStore.allZones]);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -270,7 +276,6 @@ function DisasterZonesPage() {
 
   function handleSave() {
     const newZone = {
-      id: Math.max(0, ...zones.map((z) => z.id)) + 1,
       name: form.name.trim() || "New Zone",
       disasterType: form.disasterType,
       dangerLevel: form.dangerLevel,
@@ -278,36 +283,57 @@ function DisasterZonesPage() {
       centerLongitude: parseFloat(form.centerLongitude) || 0,
       radius: parseFloat(form.radius) || 1,
     };
-    setZones((prev) => [newZone, ...prev]);
-    setIsAddOpen(false);
+    dispatch(createDisasterZone(newZone))
+      .then(() => {
+        dispatch(getAllDisasterZones());
+        toast.success(`Zone "${newZone.name}" created successfully`);
+        setIsAddOpen(false);
+      })
+      .catch((err) => {
+        toast.error("Failed to create Zone. Please try again");
+      });
   }
 
   function handleUpdate() {
     if (!activeZone) return;
-    const updated = zones.map((z) =>
-      z.id === activeZone.id
-        ? {
-            ...z,
-            name: form.name.trim() || z.name,
-            disasterType: form.disasterType,
-            dangerLevel: form.dangerLevel,
-            centerLatitude: parseFloat(form.centerLatitude) || z.centerLatitude,
-            centerLongitude: parseFloat(form.centerLongitude) || z.centerLongitude,
-            radius: parseFloat(form.radius) || z.radius,
-          }
-        : z
-    );
-    setZones(updated);
-    setIsEditOpen(false);
+    const updatedZone = {
+      name: form.name.trim() || z.name,
+      disasterType: form.disasterType,
+      dangerLevel: form.dangerLevel,
+      centerLatitude: parseFloat(form.centerLatitude) || z.centerLatitude,
+      centerLongitude: parseFloat(form.centerLongitude) || z.centerLongitude,
+      radius: parseFloat(form.radius) || z.radius,
+    };
+
+    dispatch(udpateDisasterZone({ zoneData: updatedZone, id: activeZone.id }))
+      .then(() => {
+        dispatch(getAllDisasterZones());
+        if (disasterStore?.udpateZoneError == null) {
+          toast.success(`Zone "${updatedZone.name}" updated successfully`);
+        }
+        setIsEditOpen(false);
+      })
+      .catch((err) => {
+        toast.error("Failed to update Zone. Please try again later");
+      });
   }
 
   function handleDelete() {
     if (!activeZone) return;
-    setZones((prev) => prev.filter((z) => z.id !== activeZone.id));
-    setIsDeleteOpen(false);
+    dispatch(deleteDisasterZone(activeZone.id))
+      .then(() => {
+        dispatch(getAllDisasterZones());
+        if (disasterStore?.deleteZoneError == null) {
+          toast.success("Zone deleted successfully!");
+        }
+        setIsDeleteOpen(false);
+      })
+      .catch((error) => {
+        toast.error("Failed to delete the zone");
+      });
   }
 
-  const typeOptions = ["", "FLOOD", "FIRE", "EARTHQUAKE", "CYCLONE", "HEATWAVE", "LANDSLIDE", "STORM"];
+  const typeOptions = ["", "FLOOD", "EARTHQUAKE", "LANDSLIDE", "TORNADO", "SINKHOLE", "TSUNAMI", "WILDFIRE", "BLIZZARD"];
   const dangerOptions = ["", "LOW", "MEDIUM", "HIGH"];
 
   return (
@@ -320,7 +346,10 @@ function DisasterZonesPage() {
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-100">Disaster Zones Management</h1>
               <p className="mt-1 text-sm text-slate-400">View, add, and manage disaster zones</p>
             </div>
-            <button onClick={() => navigate('/')} className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-indigo-700">
+            <button
+              onClick={() => navigate("/")}
+              className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-indigo-700"
+            >
               Back to Dashboard
             </button>
           </div>
@@ -389,12 +418,14 @@ function DisasterZonesPage() {
         </section>
 
         {/* Zones Grid */}
+        {disasterStore?.allZonesError && <p className="text-red-500 text-center">Something went wrong! Try refreshing the page</p>}
+        {disasterStore?.allZonesLoading && <p className="text-green-500 text-center">Fetching all the active zones...</p>}
         <section>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedZones.map((z) => (
               <div key={z.id} className="group rounded-2xl border border-slate-800 bg-slate-900 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="p-4">
-                  <div 
+                  <div
                     className="flex items-start justify-between gap-3 cursor-pointer hover:bg-slate-800/50 rounded-lg p-2 -m-2 transition-colors"
                     onClick={() => navigate(`/zones/${z.id}`)}
                   >
@@ -408,7 +439,9 @@ function DisasterZonesPage() {
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-300">
                     <div>
                       <div className="text-slate-400">Center (lat,lng)</div>
-                      <div>{z.centerLatitude.toFixed(4)}, {z.centerLongitude.toFixed(4)}</div>
+                      <div>
+                        {z.centerLatitude.toFixed(4)}, {z.centerLongitude.toFixed(4)}
+                      </div>
                     </div>
                     <div>
                       <div className="text-slate-400">Radius</div>
@@ -416,7 +449,9 @@ function DisasterZonesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-3"><MiniZoneMap lat={z.centerLatitude} lng={z.centerLongitude} radiusKm={z.radius} dangerLevel={z.dangerLevel} /></div>
+                  <div className="mt-3">
+                    <MiniZoneMap lat={z.centerLatitude} lng={z.centerLongitude} radiusKm={z.radius} dangerLevel={z.dangerLevel} />
+                  </div>
 
                   <div className="mt-4 flex items-center justify-between gap-2">
                     <div className="flex gap-2">
@@ -444,15 +479,11 @@ function DisasterZonesPage() {
               </div>
             ))}
           </div>
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-6 flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
           )}
         </section>
@@ -465,8 +496,15 @@ function DisasterZonesPage() {
           onClose={() => setIsAddOpen(false)}
           footer={
             <>
-              <button onClick={() => setIsAddOpen(false)} className="rounded-md border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800">Cancel</button>
-              <button onClick={handleSave} className="rounded-md bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700">Save</button>
+              <button
+                onClick={() => setIsAddOpen(false)}
+                className="rounded-md border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+              <button onClick={handleSave} className="rounded-md bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700">
+                {disasterStore?.createZoneLoading || disasterStore?.updateZoneLoading ? "Processing" : "Save"}
+              </button>
             </>
           }
         >
@@ -474,35 +512,63 @@ function DisasterZonesPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="block text-xs text-slate-300">Name</label>
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
             <div>
               <label className="block text-xs text-slate-300">Disaster Type</label>
-              <select value={form.disasterType} onChange={(e) => setForm({ ...form, disasterType: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+              <select
+                value={form.disasterType}
+                onChange={(e) => setForm({ ...form, disasterType: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              >
                 {typeOptions.filter(Boolean).map((opt) => (
-                  <option key={opt} value={opt} className="bg-slate-900">{opt}</option>
+                  <option key={opt} value={opt} className="bg-slate-900">
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-xs text-slate-300">Danger Level</label>
-              <select value={form.dangerLevel} onChange={(e) => setForm({ ...form, dangerLevel: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+              <select
+                value={form.dangerLevel}
+                onChange={(e) => setForm({ ...form, dangerLevel: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              >
                 {dangerOptions.filter(Boolean).map((opt) => (
-                  <option key={opt} value={opt} className="bg-slate-900">{opt}</option>
+                  <option key={opt} value={opt} className="bg-slate-900">
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-xs text-slate-300">Latitude</label>
-              <input value={form.centerLatitude} onChange={(e) => setForm({ ...form, centerLatitude: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.centerLatitude}
+                onChange={(e) => setForm({ ...form, centerLatitude: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
             <div>
               <label className="block text-xs text-slate-300">Longitude</label>
-              <input value={form.centerLongitude} onChange={(e) => setForm({ ...form, centerLongitude: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.centerLongitude}
+                onChange={(e) => setForm({ ...form, centerLongitude: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
             <div>
               <label className="block text-xs text-slate-300">Radius (km)</label>
-              <input value={form.radius} onChange={(e) => setForm({ ...form, radius: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.radius}
+                onChange={(e) => setForm({ ...form, radius: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
           </div>
         </Modal>
@@ -515,43 +581,78 @@ function DisasterZonesPage() {
           onClose={() => setIsEditOpen(false)}
           footer={
             <>
-              <button onClick={() => setIsEditOpen(false)} className="rounded-md border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800">Cancel</button>
-              <button onClick={handleUpdate} className="rounded-md bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700">Update</button>
+              <button
+                onClick={() => setIsEditOpen(false)}
+                className="rounded-md border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+              <button onClick={handleUpdate} className="rounded-md bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700">
+                Update
+              </button>
             </>
           }
         >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="block text-xs text-slate-300">Name</label>
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
             <div>
               <label className="block text-xs text-slate-300">Disaster Type</label>
-              <select value={form.disasterType} onChange={(e) => setForm({ ...form, disasterType: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+              <select
+                value={form.disasterType}
+                onChange={(e) => setForm({ ...form, disasterType: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              >
                 {typeOptions.filter(Boolean).map((opt) => (
-                  <option key={opt} value={opt} className="bg-slate-900">{opt}</option>
+                  <option key={opt} value={opt} className="bg-slate-900">
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-xs text-slate-300">Danger Level</label>
-              <select value={form.dangerLevel} onChange={(e) => setForm({ ...form, dangerLevel: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+              <select
+                value={form.dangerLevel}
+                onChange={(e) => setForm({ ...form, dangerLevel: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              >
                 {dangerOptions.filter(Boolean).map((opt) => (
-                  <option key={opt} value={opt} className="bg-slate-900">{opt}</option>
+                  <option key={opt} value={opt} className="bg-slate-900">
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-xs text-slate-300">Latitude</label>
-              <input value={form.centerLatitude} onChange={(e) => setForm({ ...form, centerLatitude: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.centerLatitude}
+                onChange={(e) => setForm({ ...form, centerLatitude: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
             <div>
               <label className="block text-xs text-slate-300">Longitude</label>
-              <input value={form.centerLongitude} onChange={(e) => setForm({ ...form, centerLongitude: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.centerLongitude}
+                onChange={(e) => setForm({ ...form, centerLongitude: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
             <div>
               <label className="block text-xs text-slate-300">Radius (km)</label>
-              <input value={form.radius} onChange={(e) => setForm({ ...form, radius: e.target.value })} className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200" />
+              <input
+                value={form.radius}
+                onChange={(e) => setForm({ ...form, radius: e.target.value })}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+              />
             </div>
           </div>
         </Modal>
@@ -564,8 +665,19 @@ function DisasterZonesPage() {
           onClose={() => setIsDeleteOpen(false)}
           footer={
             <>
-              <button onClick={() => setIsDeleteOpen(false)} className="rounded-md border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800">Cancel</button>
-              <button onClick={handleDelete} className="rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700">Confirm</button>
+              <button
+                onClick={() => setIsDeleteOpen(false)}
+                className="rounded-md border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={disasterStore?.deleteZoneLoading}
+                onClick={handleDelete}
+                className="rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700"
+              >
+                {disasterStore?.deleteZoneLoading ? "Processing" : "Confirm"}
+              </button>
             </>
           }
         >
@@ -577,5 +689,3 @@ function DisasterZonesPage() {
 }
 
 export default DisasterZonesPage;
-
-

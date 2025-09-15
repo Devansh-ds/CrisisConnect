@@ -53,7 +53,7 @@ public class SosRequestController {
 
     // admin only
 
-    @GetMapping("/admin/sos")
+    @GetMapping("/sos/all")
     public ResponseEntity<List<SosRequestDto>> getAllSosRequests(@RequestParam(required = false) SosStatus status,
                                                                  @RequestParam(required = false) Integer zoneId) throws UserException {
         return ResponseEntity.ok(sosRequestService.getFilteredRequests(status, zoneId));

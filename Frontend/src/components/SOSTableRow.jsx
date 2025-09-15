@@ -1,22 +1,25 @@
 import React from "react";
 
 const statusStyles = {
-  Pending: {
+  HANDLING: {
     badge: "bg-yellow-900/30 text-yellow-300 ring-yellow-700/40",
   },
-  Resolved: {
+  COMPLETED: {
     badge: "bg-green-900/30 text-green-300 ring-green-700/40",
   },
-  Critical: {
+  PENDING: {
     badge: "bg-red-900/30 text-red-300 ring-red-700/40",
+  },
+  CANCELLED: {
+    badge: "bg-slate-800 text-slate-300 ring-slate-700",
   },
   default: {
     badge: "bg-slate-800 text-slate-300 ring-slate-700",
   },
 };
 
-function getStatusBadgeClass(status) {
-  const key = (status || "").trim();
+function getStatusBadgeClass(sosStatus) {
+  const key = (sosStatus || "").trim();
   return (statusStyles[key] || statusStyles.default).badge;
 }
 
@@ -56,18 +59,24 @@ export function SOSTableRowCard({ location, message, status, time, onResolve }) 
   );
 }
 
-function SOSTableRow({ location, message, status, time, onResolve }) {
-  const badgeClass = getStatusBadgeClass(status);
+function SOSTableRow({ latitude, longitude, message, sosStatus, updatedAt, onResolve }) {
+  const badgeClass = getStatusBadgeClass(sosStatus);
   return (
     <tr className="bg-slate-900 hover:bg-slate-800">
-      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-200">{location}</td>
+      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-200">{latitude}</td>
+      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-200">{longitude}</td>
       <td className="px-4 py-3 text-sm text-slate-300">{message}</td>
       <td className="px-4 py-3 text-sm">
         <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badgeClass}`}>
-          {status || "Unknown"}
+          {sosStatus || "Unknown"}
         </span>
       </td>
-      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-400">{time}</td>
+      <td className="whitespace-nowrap px-4 py-3 text-[13px] text-slate-400">
+        <div>
+          <p>{updatedAt.split("T")[0]}</p>
+          <p>{updatedAt.split("T")[1].split(".")[0]}</p>
+        </div>
+      </td>
       {/* <td className="px-4 py-3 text-sm">
         <button
           type="button"
@@ -82,5 +91,3 @@ function SOSTableRow({ location, message, status, time, onResolve }) {
 }
 
 export default SOSTableRow;
-
-

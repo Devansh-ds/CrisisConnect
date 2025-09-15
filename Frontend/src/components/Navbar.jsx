@@ -1,39 +1,47 @@
 import React, { useState } from "react";
-import { Menu, User, LogOut, ChevronDown } from "lucide-react";
+import { Menu, User, LogOut, ChevronDown, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { LOGOUT } from "../Redux/Auth/ActionType";
 import { useDispatch, useSelector } from "react-redux";
 
 function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // profile dropdown
+  const [sidebar, setSidebar] = useState(false); // mobile sidebar
   const location = useLocation();
   const dispatch = useDispatch();
   const { email } = useSelector((store) => store.authStore);
 
-  const linkBase = "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium";
-  const active = "bg-white/20 text-white";
-  const inactive = "text-white/90 hover:bg-white/15";
+  const linkBase = "block rounded-md px-3 py-2 text-sm font-medium";
+  const active = "bg-blue-700 text-white";
+  const inactive = "text-gray-700 hover:bg-gray-100";
 
   return (
     <nav className="sticky top-0 z-9999 w-full border-b border-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Menu className="h-5 w-5 text-white/90 sm:hidden" />
+            {/* Hamburger (mobile only) */}
+            <button className="sm:hidden" onClick={() => setSidebar(true)}>
+              <Menu className="h-6 w-6 text-white/90" />
+            </button>
+
             <span className="text-lg sm:text-xl font-semibold tracking-tight text-white">DISASTER PWA</span>
+
+            {/* Desktop Links */}
             <div className="hidden sm:flex items-center gap-2 ml-4">
-              <Link to="/" className={`${linkBase} ${location.pathname === "/" ? active : inactive}`}>
+              <Link to="/" className={`${linkBase} ${location.pathname === "/" ? active : "text-white/90 hover:bg-white/15"}`}>
                 Dashboard
               </Link>
-              <Link to="/zones" className={`${linkBase} ${location.pathname.startsWith("/zones") ? active : inactive}`}>
+              <Link to="/zones" className={`${linkBase} ${location.pathname.startsWith("/zones") ? active : "text-white/90 hover:bg-white/15"}`}>
                 Disaster Zones
               </Link>
-              <Link to="/sos" className={`${linkBase} ${location.pathname.startsWith("/sos") ? active : inactive}`}>
+              <Link to="/sos" className={`${linkBase} ${location.pathname.startsWith("/sos") ? active : "text-white/90 hover:bg-white/15"}`}>
                 SOS Requests
               </Link>
             </div>
           </div>
 
+          {/* Profile dropdown */}
           <div className="relative">
             <button
               type="button"
@@ -63,6 +71,39 @@ function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Sidebar Drawer */}
+      {sidebar && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Sidebar */}
+          <div className="w-64 bg-slate-950 shadow-lg p-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold text-white">Menu</h2>
+              <button onClick={() => setSidebar(false)}>
+                <X className="h-6 w-6 text-white" />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-2">
+              <Link to="/" onClick={() => setSidebar(false)} className={`${linkBase} ${location.pathname === "/" ? active : inactive}`}>
+                Dashboard
+              </Link>
+              <Link
+                to="/zones"
+                onClick={() => setSidebar(false)}
+                className={`${linkBase} ${location.pathname.startsWith("/zones") ? active : inactive}`}
+              >
+                Disaster Zones
+              </Link>
+              <Link to="/sos" onClick={() => setSidebar(false)} className={`${linkBase} ${location.pathname.startsWith("/sos") ? active : inactive}`}>
+                SOS Requests
+              </Link>
+            </nav>
+          </div>
+
+          {/* Overlay (click outside to close) */}
+          <div className="flex-1 bg-black/40" onClick={() => setSidebar(false)} />
+        </div>
+      )}
     </nav>
   );
 }

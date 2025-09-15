@@ -5,129 +5,57 @@ import SOSTableRow from "../components/SOSTableRow";
 import ZoneActivityChart from "../components/ZoneActivityChart";
 import MapOverview from "../components/MapOverview";
 import { ShieldAlert, Activity, Map as MapIcon } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getDashboardSummay, getRecentSos, getZoneActivity } from "../Redux/Dashboard/Action";
+import { p } from "framer-motion/client";
+import { getAllDisasterZones } from "../Redux/DisasterZone/Action";
 
 function DashboardPage() {
+  const dispatch = useDispatch();
+  const dashboardStore = useSelector((store) => store.dashboardStore);
+  const disasterStore = useSelector((store) => store.disasterStore);
+
+  // GET STATS FOR THE DASHBOARD
+  useEffect(() => {
+    dispatch(getDashboardSummay());
+  }, [dispatch]);
+
+  const { totalZones = 0, activeDisasters = 0, criticalZones = 0, pendingSos = 0 } = dashboardStore.dashboardSummary || {};
 
   const statCards = [
-    { title: "Total Zones", value: "12", subtitle: "Monitored areas", color: "blue", icon: "map" },
-    { title: "Active Disasters", value: "3", subtitle: "Ongoing emergencies", color: "yellow", icon: "alert-triangle" },
-    { title: "Critical Zones", value: "2", subtitle: "High-risk areas", color: "red", icon: "flame" },
-    { title: "SOS Requests", value: "8", subtitle: "Pending responses", color: "green", icon: "life-buoy" },
+    { title: "Total Disaster Type", value: totalZones, subtitle: "Monitored disasters", color: "blue", icon: "map" },
+    { title: "Active Disasters Zones", value: activeDisasters, subtitle: "Ongoing emergencies", color: "yellow", icon: "alert-triangle" },
+    { title: "Critical Zones", value: criticalZones, subtitle: "High-risk areas", color: "red", icon: "flame" },
+    { title: "SOS Requests", value: pendingSos, subtitle: "Pending responses", color: "green", icon: "life-buoy" },
   ];
 
-  const sosRows = [
-    { location: "Sector 12", message: "Building collapse - assistance needed", status: "Critical", time: "09:45 AM" },
-    { location: "Sector 7", message: "Water supply disrupted", status: "Pending", time: "10:10 AM" },
-    { location: "Sector 3", message: "Medical attention required", status: "Critical", time: "10:32 AM" },
-    { location: "Sector 18", message: "Food distribution ongoing", status: "Resolved", time: "11:05 AM" },
-    { location: "Sector 12", message: "Building collapse - assistance needed", status: "Critical", time: "09:45 AM" },
-    { location: "Sector 5", message: "Communication lines down", status: "Pending", time: "11:50 AM" },
-    { location: "Sector 5", message: "Communication lines down", status: "Pending", time: "11:50 AM" },
-    { location: "Sector 3", message: "Medical attention required", status: "Critical", time: "10:32 AM" },
-    { location: "Sector 18", message: "Food distribution ongoing", status: "Resolved", time: "11:05 AM" },
-    { location: "Sector 5", message: "Communication lines down", status: "Pending", time: "11:50 AM" },
-    { location: "Sector 7", message: "Water supply disrupted", status: "Pending", time: "10:10 AM" },
-  ];
+  // GET RECENT SOS FOR THE DASHBOARD
+  useEffect(() => {
+    dispatch(getRecentSos());
+  }, [dispatch]);
 
-  const zoneActivityData = [
-    { date: "2025-09-01", activeDisasters: 2, sosRequests: 12 },
-    { date: "2025-09-02", activeDisasters: 3, sosRequests: 18 },
-    { date: "2025-09-03", activeDisasters: 1, sosRequests: 7 },
-    { date: "2025-09-04", activeDisasters: 4, sosRequests: 25 },
-    { date: "2025-09-05", activeDisasters: 2, sosRequests: 10 },
-    { date: "2025-09-06", activeDisasters: 3, sosRequests: 15 },
-    { date: "2025-09-07", activeDisasters: 2, sosRequests: 9 },
-  ];
+  const sosRows = dashboardStore?.listSos?.slice(0, 9) || [];
 
-  const sampleZones = [
-    {
-      id: 1,
-      name: "Mumbai Flood Zone Updated",
-      disasterType: "FLOOD",
-      dangerLevel: "HIGH",
-      centerLatitude: 19.08,
-      centerLongitude: 72.88,
-      radius: 20,
-    },
-    {
-      id: 2,
-      name: "Delhi Heatwave Zone",
-      disasterType: "HEATWAVE",
-      dangerLevel: "LOW",
-      centerLatitude: 28.7041,
-      centerLongitude: 77.1025,
-      radius: 10,
-    },
-    {
-      id: 3,
-      name: "Chennai Cyclone Risk",
-      disasterType: "CYCLONE",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 13.0827,
-      centerLongitude: 80.2707,
-      radius: 15,
-    },
-    { id: 4, name: "Kolkata Flood Watch", disasterType: "FLOOD", dangerLevel: "LOW", centerLatitude: 22.5726, centerLongitude: 88.3639, radius: 8 },
-    {
-      id: 5,
-      name: "Ahmedabad Heat Advisory",
-      disasterType: "HEATWAVE",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 23.0225,
-      centerLongitude: 72.5714,
-      radius: 12,
-    },
-    {
-      id: 6,
-      name: "Bengaluru Urban Flood",
-      disasterType: "FLOOD",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 12.9716,
-      centerLongitude: 77.5946,
-      radius: 10,
-    },
-    { id: 7, name: "Hyderabad Heatwave", disasterType: "HEATWAVE", dangerLevel: "LOW", centerLatitude: 17.385, centerLongitude: 78.4867, radius: 9 },
-    {
-      id: 8,
-      name: "Pune Landslide Risk",
-      disasterType: "LANDSLIDE",
-      dangerLevel: "LOW",
-      centerLatitude: 18.5204,
-      centerLongitude: 73.8567,
-      radius: 7,
-    },
-    {
-      id: 9,
-      name: "Jaipur Dust Storm",
-      disasterType: "DUST_STORM",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 26.9124,
-      centerLongitude: 75.7873,
-      radius: 14,
-    },
-    {
-      id: 10,
-      name: "Lucknow Heat Stress",
-      disasterType: "HEATWAVE",
-      dangerLevel: "LOW",
-      centerLatitude: 26.8467,
-      centerLongitude: 80.9462,
-      radius: 6,
-    },
-    { id: 11, name: "Surat Flood Alert", disasterType: "FLOOD", dangerLevel: "HIGH", centerLatitude: 21.1702, centerLongitude: 72.8311, radius: 18 },
-    {
-      id: 12,
-      name: "Nagpur Heat Risk",
-      disasterType: "HEATWAVE",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 21.1458,
-      centerLongitude: 79.0882,
-      radius: 11,
-    },
-    { id: 13, name: "Indore Storm Watch", disasterType: "STORM", dangerLevel: "LOW", centerLatitude: 22.7196, centerLongitude: 75.8577, radius: 9 },
-    { id: 14, name: "Bhopal Floodplain", disasterType: "FLOOD", dangerLevel: "LOW", centerLatitude: 23.2599, centerLongitude: 77.4126, radius: 10 },
-    { id: 15, name: "Patna River Flood", disasterType: "FLOOD", dangerLevel: "HIGH", centerLatitude: 25.5941, centerLongitude: 85.1376, radius: 16 },
-  ];
+  // ZONE ACTIVITY
+  useEffect(() => {
+    dispatch(getZoneActivity());
+  }, [dispatch]);
+
+  const zoneStats = dashboardStore?.stats || {};
+  const zoneActivityData =
+    zoneStats?.dates?.map((date, index) => ({
+      date,
+      activeDisasters: zoneStats?.activeDisasters[index] ?? 0,
+      sosRequests: zoneStats?.sosCounts[index] ?? 0,
+    })) || [];
+
+  // GET ALL DISASTER ZONES FOR THE MAP.
+  useEffect(() => {
+    dispatch(getAllDisasterZones());
+  }, []);
+
+  const sampleZones = disasterStore?.allZones || [];
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -147,6 +75,7 @@ function DashboardPage() {
 
         {/* Stats Overview */}
         <section>
+          {dashboardStore.summaryLoading && <p className="text-amber-400 mb-4 mt-0 text-center">Updating Stats...</p>}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {statCards.map((s) => (
               <StatsCard key={s.title} title={s.title} value={s.value} subtitle={s.subtitle} color={s.color} icon={s.icon} />
@@ -162,13 +91,15 @@ function DashboardPage() {
               <div className="px-4 py-3 border-b border-slate-800 bg-slate-800/60 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-indigo-400" />
                 <h2 className="text-sm font-semibold text-slate-100">Recent SOS Requests</h2>
+                {dashboardStore.loadingSos && <p className="text-slate-500 text-sm">Updating...</p>}
               </div>
               <div className="px-4 py-2 text-xs text-slate-400">Latest emergency requests from affected areas</div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-slate-800">
                   <thead className="bg-slate-900">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Location</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Lat</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Long</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Message</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Status</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Time</th>
@@ -259,7 +190,7 @@ function DashboardPage() {
         </section>
 
         {/* Footer */}
-        <footer className="text-center text-sm text-slate-500 py-6">DisasterPWA © 2025 | Built with React + Tailwind</footer>
+        <footer className="text-center text-sm text-slate-500 py-6">DisasterPWA © 2025</footer>
       </main>
     </div>
   );

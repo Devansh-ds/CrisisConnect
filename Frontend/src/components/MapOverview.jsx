@@ -17,11 +17,13 @@ function useLeafletDefaultIcon() {
 
 const statusBadgeClass = (status) => {
   const map = {
-    Critical: "bg-red-100 text-red-800 ring-red-200",
-    Active: "bg-yellow-100 text-yellow-800 ring-yellow-200",
-    Safe: "bg-green-100 text-green-800 ring-green-200",
+    HIGH: "bg-red-100 text-red-800 ring-red-200",
+    MEDIUM: "bg-yellow-100 text-yellow-800 ring-yellow-200",
+    LOW: "bg-green-100 text-green-800 ring-green-200",
   };
-  return `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${map[status] || "bg-gray-100 text-gray-800 ring-gray-200"}`;
+  return `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+    map[status] || "bg-gray-100 text-gray-800 ring-gray-200"
+  }`;
 };
 
 function getCircleStyle(dangerLevel) {
@@ -45,19 +47,12 @@ function MapOverview({ zones = [] }) {
       </div>
 
       {!hasZones ? (
-        <div className="mt-3 h-[32rem] w-full rounded-xl bg-slate-800 grid place-items-center text-slate-400">
-          No zones available
-        </div>
+        <div className="mt-3 h-[32rem] w-full rounded-xl bg-slate-800 grid place-items-center text-slate-400">No zones available</div>
       ) : (
         <div className="mt-3 h-[32rem] w-full overflow-hidden rounded-xl">
-          <MapContainer
-            center={[20.5937, 78.9629]}
-            zoom={5}
-            scrollWheelZoom={false}
-            className="h-full w-full"
-          >
+          <MapContainer center={[20.5937, 78.9629]} zoom={5} scrollWheelZoom={false} className="h-full w-full">
             <TileLayer
-              attribution='&copy; OpenStreetMap contributors'
+              attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               subdomains={["a", "b", "c"]}
             />
@@ -67,14 +62,12 @@ function MapOverview({ zones = [] }) {
                   <div className="space-y-1">
                     <div className="text-sm font-semibold text-slate-900">{z.name}</div>
                     <div className="text-xs text-slate-700">Type: {z.disasterType || "Unknown"}</div>
-                    <div className="text-xs">Danger: <span className={statusBadgeClass(z.dangerLevel)}>{z.dangerLevel || "Unknown"}</span></div>
+                    <div className="text-xs">
+                      Danger: <span className={statusBadgeClass(z.dangerLevel)}>{z.dangerLevel || "Unknown"}</span>
+                    </div>
                   </div>
                 </Popup>
-                <Circle
-                  center={[z.centerLatitude, z.centerLongitude]}
-                  radius={(z.radius || 0) * 1000}
-                  pathOptions={getCircleStyle(z.dangerLevel)}
-                />
+                <Circle center={[z.centerLatitude, z.centerLongitude]} radius={(z.radius || 0) * 1000} pathOptions={getCircleStyle(z.dangerLevel)} />
               </Marker>
             ))}
           </MapContainer>
@@ -85,5 +78,3 @@ function MapOverview({ zones = [] }) {
 }
 
 export default MapOverview;
-
-
