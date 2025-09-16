@@ -30,6 +30,7 @@ public class User implements UserDetails {
 
     private String phoneNumber;
     private String fullname;
+    private String address;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

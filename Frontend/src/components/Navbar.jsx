@@ -50,7 +50,7 @@ function Navbar() {
               className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm text-white shadow-sm ring-1 ring-white/20 hover:bg-white/15"
             >
               <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-blue-700 text-xs font-semibold">
-                {email[0].toUpperCase()}
+                {email[0]?.toUpperCase()}
               </span>
               <span className="hidden sm:inline">{email.split("@")[0].toUpperCase()}</span>
               <ChevronDown className="h-4 w-4 text-white/90" />
