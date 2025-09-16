@@ -8,6 +8,9 @@ import {
   GET_SOS_BY_ZONE_FAILURE,
   GET_SOS_BY_ZONE_REQUEST,
   GET_SOS_BY_ZONE_SUCCESS,
+  MY_SOS_FAILURE,
+  MY_SOS_REQUEST,
+  MY_SOS_SUCCESS,
   UPDATE_STATUS_FAILURE,
   UPDATE_STATUS_REQUEST,
   UPDATE_STATUS_SUCCESS,
@@ -23,7 +26,10 @@ const initialState = {
   zoneSosLoading: null,
   zoneSosError: null,
   updateStatusLodaing: null,
-  updateStatusError: null
+  updateStatusError: null,
+  mySos: null,
+  mySosLoading: null,
+  mySosError: null,
 };
 
 export const sosReducer = (store = initialState, { type, payload }) => {
@@ -52,6 +58,12 @@ export const sosReducer = (store = initialState, { type, payload }) => {
       return { ...store, updateStatusLodaing: false, updateStatusError: null };
     case UPDATE_STATUS_FAILURE:
       return { ...store, updateStatusLodaing: false, updateStatusError: payload };
+    case MY_SOS_REQUEST:
+      return { ...store, mySosLoading: true, mySosError: null };
+    case MY_SOS_SUCCESS:
+      return { ...store, mySos: payload, mySosLoading: false, mySosError: null };
+    case MY_SOS_FAILURE:
+      return { ...store, mySosLoading: false, mySosError: payload };
     default:
       return store;
   }

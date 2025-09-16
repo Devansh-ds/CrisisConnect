@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Menu, User, LogOut, ChevronDown, X } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LOGOUT } from "../Redux/Auth/ActionType";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -10,6 +10,7 @@ function Navbar() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { email } = useSelector((store) => store.authStore);
+  const navigate = useNavigate();
 
   const linkBase = "block rounded-md px-3 py-2 text-sm font-medium";
   const active = "bg-blue-700 text-white";
@@ -57,7 +58,13 @@ function Navbar() {
 
             {open && (
               <div className="absolute right-0 mt-2 w-40 origin-top-right rounded-lg border border-gray-200 bg-white py-1.5 shadow-lg">
-                <button className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <button
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => {
+                    navigate("/profile");
+                    setOpen(false);
+                  }}
+                >
                   <User className="h-4 w-4" /> Profile
                 </button>
                 <button

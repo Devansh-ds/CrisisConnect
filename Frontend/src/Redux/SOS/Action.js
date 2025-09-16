@@ -10,6 +10,9 @@ import {
   GET_SOS_BY_ZONE_FAILURE,
   GET_SOS_BY_ZONE_REQUEST,
   GET_SOS_BY_ZONE_SUCCESS,
+  MY_SOS_FAILURE,
+  MY_SOS_REQUEST,
+  MY_SOS_SUCCESS,
   UPDATE_STATUS_FAILURE,
   UPDATE_STATUS_REQUEST,
   UPDATE_STATUS_SUCCESS,
@@ -162,3 +165,43 @@ export const udpateSosStatus =
       dispatch({ type: UPDATE_STATUS_FAILURE, payload: error.message || "Something went wrong!" });
     }
   };
+
+export const mySos = () => async (dispatch) => {
+  try {
+    dispatch({ type: MY_SOS_REQUEST });
+
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      dispatch({ type: UPDATE_STATUS_REQUEST, payload: "No access token found" });
+      return;
+    }
+
+    const res = await fetch(`${BASE_URL}/sos`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    let resData;
+    try {
+      resData = await res.json();
+    } catch {
+      resData = {};
+    }
+
+    console.log("my sos requests: ", resData);
+
+    if (!res.ok) {
+      toast.error(resData || "Failed to get your sos requests");
+      dispatch({ type: MY_SOS_FAILURE, payload: resData || "Failed to get your sos" });
+      return;
+    }
+
+    dispatch({ type: MY_SOS_SUCCESS, payload: resData });
+
+  } catch (error) {
+    console.error("get my sos (error): ", error);
+    dispatch({ type: MY_SOS_FAILURE, payload: error.message || "Something went wrong!" });
+  }
+};

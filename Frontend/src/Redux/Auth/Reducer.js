@@ -1,4 +1,18 @@
-import { LOGIN_FAILURE, LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT, REGISTER_FAILURE, REGISTER_REQUEST, REGISTER_SUCCESS } from "./ActionType.js";
+import {
+  GET_DETAILS_FAILURE,
+  GET_DETAILS_REQUEST,
+  GET_DETAILS_SUCCESS,
+  LOGIN_FAILURE,
+  LOGIN_REQUEST,
+  LOGIN_SUCCESS,
+  LOGOUT,
+  REGISTER_FAILURE,
+  REGISTER_REQUEST,
+  REGISTER_SUCCESS,
+  UPDATE_DETAILS_FAILURE,
+  UPDATE_DETAILS_REQUEST,
+  UPDATE_DETAILS_SUCCESS,
+} from "./ActionType.js";
 import { jwtDecode } from "jwt-decode";
 import { isTokenValid } from "./isTokenValid.js";
 
@@ -21,6 +35,11 @@ const initialState = {
   loading: false,
   error: null,
   email: decoded?.sub || null,
+  currentUser: null,
+  currentUserLoading: null,
+  currentUserError: false,
+  udpateUserLoading: null,
+  updateUserError: null,
 };
 
 export const authReducer = (store = initialState, { type, payload }) => {
@@ -75,6 +94,18 @@ export const authReducer = (store = initialState, { type, payload }) => {
         ...initialState,
         isAuthenticated: false,
       };
+    case GET_DETAILS_REQUEST:
+      return { ...store, currentUserLoading: true, currentUserError: null };
+    case GET_DETAILS_SUCCESS:
+      return { ...store, currentUser: payload, currentUserLoading: false, currentUserError: null };
+    case GET_DETAILS_FAILURE:
+      return { ...store, currentUserLoading: false, currentUserError: payload };
+    case UPDATE_DETAILS_REQUEST:
+      return { ...store, udpateUserLoading: true, updateUserError: null };
+    case UPDATE_DETAILS_SUCCESS:
+      return { ...store, udpateUserLoading: false, updateUserError: null };
+    case UPDATE_DETAILS_FAILURE:
+      return { ...store, udpateUserLoading: false, updateUserError: payload };
     default:
       return store;
   }
