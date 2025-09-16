@@ -11,6 +11,9 @@ import {
   DELETE_ZONE_REQEUST,
   DELETE_ZONE_SUCCESS,
   DELETE_ZONE_FAILURE,
+  CURRENT_ZONE_REQUEST,
+  CURRENT_ZONE_SUCCESS,
+  CURRENT_ZONE_FAILURE,
 } from "./ActionType";
 
 const initialState = {
@@ -22,7 +25,10 @@ const initialState = {
   updateZoneLoading: null,
   updateZoneError: null,
   deleteZoneLoading: null,
-  deleteZoneError: null
+  deleteZoneError: null,
+  currentZone: null,
+  currentZoneLoading: null,
+  currentZoneError: null,
 };
 
 export const disasterReducer = (store = initialState, { type, payload }) => {
@@ -45,15 +51,18 @@ export const disasterReducer = (store = initialState, { type, payload }) => {
       return { ...store, updateZoneLoading: false, updateZoneError: null };
     case UPDATE_ZONE_FAILURE:
       return { ...store, updateZoneLoading: false, updateZoneError: payload };
-    case DELETE_ZONE_REQEUST: {
-      return {...store, deleteZoneLoading: true, deleteZoneError: null};
-    }
-    case DELETE_ZONE_SUCCESS: {
-      return {...store, deleteZoneLoading: false, deleteZoneError: null};
-    }
-    case DELETE_ZONE_FAILURE: {
-      return {...store, deleteZoneLoading: false, deleteZoneError: payload};
-    }
+    case DELETE_ZONE_REQEUST:
+      return { ...store, deleteZoneLoading: true, deleteZoneError: null };
+    case DELETE_ZONE_SUCCESS:
+      return { ...store, deleteZoneLoading: false, deleteZoneError: null };
+    case DELETE_ZONE_FAILURE:
+      return { ...store, deleteZoneLoading: false, deleteZoneError: payload };
+    case CURRENT_ZONE_REQUEST:
+      return { ...store, currentZoneLoading: true, currentZoneError: null };
+    case CURRENT_ZONE_SUCCESS:
+      return { ...store, currentZone: payload, currentZoneLoading: false, currentZoneError: null };
+    case CURRENT_ZONE_FAILURE:
+      return { ...store, currentZoneLoading: false, currentZoneError: payload };
     default:
       return store;
   }

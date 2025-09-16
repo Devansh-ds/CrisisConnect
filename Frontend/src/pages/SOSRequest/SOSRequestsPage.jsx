@@ -19,8 +19,9 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
 import { useDispatch, useSelector } from "react-redux";
-import { getEveryoneSos } from "../Redux/SOS/Action";
+import { getEveryoneSos, udpateSosStatus } from "../../Redux/SOS/Action";
 import { toast } from "sonner";
+import AddSosModal from "./AddSosModal.jsx";
 
 // Colored marker icons
 const redIcon = L.icon({
@@ -32,6 +33,7 @@ const redIcon = L.icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
 });
+
 const yellowIcon = L.icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
   iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png",
@@ -41,6 +43,7 @@ const yellowIcon = L.icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
 });
+
 const greenIcon = L.icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
   iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
@@ -51,19 +54,41 @@ const greenIcon = L.icon({
   shadowSize: [41, 41],
 });
 
+const blueIcon = L.icon({
+  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
+  iconRetinaUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
 const statusToIcon = (status) => {
-  if (status === "PENDING") return redIcon;
-  if (status === "IN_PROGRESS") return yellowIcon;
-  return greenIcon; // RESOLVED
+  switch (status) {
+    case "PENDING":
+      return redIcon;
+    case "HANDLING":
+      return yellowIcon;
+    case "COMPLETED":
+      return greenIcon;
+    case "CANCELLED":
+      return blueIcon;
+    default:
+      return redIcon;
+  }
 };
+
+<button className="bg-in"></button>;
 
 const statusBadge = (status) => {
   const map = {
     PENDING: "bg-red-900/30 text-red-300 ring-red-700/40",
-    IN_PROGRESS: "bg-yellow-900/30 text-yellow-300 ring-yellow-700/40",
-    RESOLVED: "bg-green-900/30 text-green-300 ring-green-700/40",
+    HANDLING: "bg-yellow-900/30 text-yellow-300 ring-yellow-700/40",
+    COMPLETED: "bg-green-900/30 text-green-300 ring-green-700/40",
+    CANCELLED: "bg-blue-900/30 text-blue-300 ring-blue-700/40",
   };
-  return `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${map[status]}`;
+  return `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${map[status] || ""}`;
 };
 
 const riskBadge = (level) => {
@@ -83,125 +108,29 @@ const disasterIcon = (type) => {
       return <Droplets className="h-4 w-4 text-blue-400" />;
     case "EARTHQUAKE":
       return <Mountain className="h-4 w-4 text-orange-400" />;
-    case "CYCLONE":
-      return <Wind className="h-4 w-4 text-cyan-400" />;
-    case "HEAT_WAVE":
-      return <Zap className="h-4 w-4 text-yellow-400" />;
-    case "FIRE":
-      return <Flame className="h-4 w-4 text-red-400" />;
     case "LANDSLIDE":
       return <Mountain className="h-4 w-4 text-green-400" />;
-    case "STORM":
+    case "TSUNAMI":
       return <CloudRain className="h-4 w-4 text-purple-400" />;
-    case "DROUGHT":
-      return <Droplets className="h-4 w-4 text-amber-600" />;
+    case "WILDFIRE":
+      return <Flame className="h-4 w-4 text-red-400" />;
+    case "TORNADO":
+      return <Wind className="h-4 w-4 text-cyan-400" />;
+    case "SINKHOLE":
+      return <Info className="h-4 w-4 text-yellow-400" />; // pick a better icon if you want
+    case "BLIZZARD":
+      return <CloudRain className="h-4 w-4 text-slate-200" />; // snowflake icon if available
     default:
       return <Info className="h-4 w-4 text-slate-300" />;
   }
 };
 
-// Provided sample data (normalized internally)
-const sampleSosRequests = [
-  {
-    id: 1,
-    user_id: 1,
-    message: "Water has entered the building, need urgent rescue",
-    latitude: 19.08,
-    longitude: 72.88,
-    createdAt: "2025-09-08T13:50:11.55601",
-    updatedAt: "2025-09-08T14:02:01.266499",
-    sosStatus: "PENDING",
-    disasterZoneDto: {
-      id: 1,
-      name: "Mumbai Flood Zone",
-      disasterType: "FLOOD",
-      dangerLevel: "HIGH",
-      centerLatitude: 19.08,
-      centerLongitude: 72.88,
-      radius: 15.5,
-    },
-  },
-  {
-    id: 2,
-    user_id: 2,
-    message: "Building partially submerged, need assistance",
-    latitude: 28.61,
-    longitude: 77.21,
-    createdAt: "2025-09-09T10:00:00.000Z",
-    updatedAt: "2025-09-09T10:30:00.000Z",
-    sosStatus: "IN_PROGRESS",
-    disasterZoneDto: {
-      id: 2,
-      name: "Delhi Earthquake Zone",
-      disasterType: "EARTHQUAKE",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 28.61,
-      centerLongitude: 77.21,
-      radius: 15,
-    },
-  },
-  {
-    id: 3,
-    user_id: 3,
-    message: "Trees fallen, need urgent clearing",
-    latitude: 13.08,
-    longitude: 80.27,
-    createdAt: "2025-09-10T09:00:00.000Z",
-    updatedAt: "2025-09-10T09:45:00.000Z",
-    sosStatus: "PENDING",
-    disasterZoneDto: {
-      id: 3,
-      name: "Chennai Cyclone Zone",
-      disasterType: "CYCLONE",
-      dangerLevel: "HIGH",
-      centerLatitude: 13.08,
-      centerLongitude: 80.27,
-      radius: 20,
-    },
-  },
-  {
-    id: 4,
-    user_id: 4,
-    message: "Fire in nearby warehouse, need firefighting support",
-    latitude: 18.52,
-    longitude: 73.86,
-    createdAt: "2025-09-10T11:00:00.000Z",
-    updatedAt: "2025-09-10T11:30:00.000Z",
-    sosStatus: "RESOLVED",
-    disasterZoneDto: {
-      id: 6,
-      name: "Pune Fire Zone",
-      disasterType: "FIRE",
-      dangerLevel: "HIGH",
-      centerLatitude: 18.52,
-      centerLongitude: 73.86,
-      radius: 8,
-    },
-  },
-  {
-    id: 5,
-    user_id: 5,
-    message: "Roads blocked due to landslide",
-    latitude: 12.97,
-    longitude: 77.59,
-    createdAt: "2025-09-11T08:00:00.000Z",
-    updatedAt: "2025-09-11T08:20:00.000Z",
-    sosStatus: "PENDING",
-    disasterZoneDto: {
-      id: 5,
-      name: "Bangalore Landslide Zone",
-      disasterType: "LANDSLIDE",
-      dangerLevel: "LOW",
-      centerLatitude: 12.97,
-      centerLongitude: 77.59,
-      radius: 12,
-    },
-  },
-];
-
 export default function SOSRequestsPage() {
   const dispatch = useDispatch();
   const sosStore = useSelector((store) => store.sosStore);
+  const { isAdmin } = useSelector((store) => store.authStore);
+  // After const sosStore...
+  const [localStatus, setLocalStatus] = useState({});
 
   useEffect(() => {
     dispatch(getEveryoneSos());
@@ -227,12 +156,22 @@ export default function SOSRequestsPage() {
         dangerLevel: r.disasterZoneDto?.dangerLevel || "N/A",
       }));
       setSos(normalized);
+
+      // Initialize localStatus for each row
+      const statusMap = {};
+      normalized.forEach((r) => {
+        statusMap[r.id] = r.status;
+      });
+      setLocalStatus(statusMap);
     }
   }, [sosStore?.allSos]);
 
+  // Add request
+  const [showAddModal, setShowAddModal] = useState(false);
+
   // Filters
-  const statuses = ["PENDING", "IN_PROGRESS", "RESOLVED"];
-  const typeOptions = ["FLOOD", "EARTHQUAKE", "CYCLONE", "HEAT_WAVE", "LANDSLIDE", "FIRE", "STORM", "DROUGHT"];
+  const statuses = ["PENDING", "COMPLETED", "HANDLING", "CANCELLED"];
+  const typeOptions = ["FLOOD", "EARTHQUAKE", "LANDSLIDE", "TORNADO", "SINKHOLE", "TSUNAMI", "WILDFIRE", "BLIZZARD"];
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [zoneNameFilter, setZoneNameFilter] = useState("");
@@ -269,7 +208,6 @@ export default function SOSRequestsPage() {
   const paginated = useMemo(() => filtered.slice((page - 1) * perPage, page * perPage), [filtered, page]);
 
   // Analytics
-  const totalCount = filtered.length;
   const byStatus = useMemo(() => statuses.map((s) => ({ name: s, value: filtered.filter((r) => r.status === s).length })), [filtered]);
   const byType = useMemo(() => typeOptions.map((t) => ({ name: t, value: filtered.filter((r) => r.disasterType === t).length })), [filtered]);
   const topZones = useMemo(() => {
@@ -289,7 +227,13 @@ export default function SOSRequestsPage() {
   }, [filtered]);
 
   const updateStatus = (id, next) => {
-    setSos((prev) => prev.map((item) => (item.id === id ? { ...item, status: next, updatedAt: new Date().toISOString() } : item)));
+    dispatch(udpateSosStatus({ sosId: id, status: next })).then((result) => {
+      if (udpateSosStatus.rejected.match(result)) {
+        toast.error("Failed to update status");
+      } else {
+        toast.success("Status updated successfully");
+      }
+    });
   };
 
   // Interactive filter handlers from analytics
@@ -308,17 +252,31 @@ export default function SOSRequestsPage() {
   const typeTotal = byType.reduce((sum, t) => sum + t.value, 0) || 1;
   const typeBarData = byType.map((t) => ({ name: t.name, count: t.value, pct: Math.round((t.value / typeTotal) * 100) }));
 
-  const barColorForStatus = (name) => (name === "PENDING" ? "#ef4444" : name === "IN_PROGRESS" ? "#f59e0b" : "#10b981");
+  const barColorForStatus = (name) => {
+    switch (name) {
+      case "PENDING":
+        return "#ef4444"; // red
+      case "HANDLING":
+        return "#f59e0b"; // yellow
+      case "COMPLETED":
+        return "#10b981"; // green
+      case "CANCELLED":
+        return "#3b82f6"; // blue
+      default:
+        return "#94a3b8"; // gray fallback
+    }
+  };
+
   const barColorForType = (name) =>
     ({
       FLOOD: "#3b82f6",
       EARTHQUAKE: "#f59e0b",
-      CYCLONE: "#06b6d4",
-      HEAT_WAVE: "#fbbf24",
-      FIRE: "#ef4444",
+      SINKHOLE: "#06b6d4",
+      WILDFIRE: "#fbbf24",
+      TORNADO: "#ef4444",
       LANDSLIDE: "#22c55e",
-      STORM: "#8b5cf6",
-      DROUGHT: "#b45309",
+      TSUNAMI: "#8b5cf6",
+      BLIZZARD: "#b45309",
     }[name] || "#94a3b8");
 
   // Hover highlights
@@ -357,12 +315,13 @@ export default function SOSRequestsPage() {
             </button>
             <button
               onClick={() => {
-                /* placeholder */
+                setShowAddModal(true);
               }}
               className="inline-flex items-center gap-2 rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 shadow hover:bg-slate-700"
             >
               Add Request
             </button>
+            <AddSosModal open={showAddModal} onClose={() => setShowAddModal(false)} />
           </div>
         </section>
 
@@ -447,7 +406,7 @@ export default function SOSRequestsPage() {
             <MapContainer center={[22.5, 80]} zoom={5} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
               {filtered.map((r) => (
-                <Marker key={r.id} position={[r.latitude, r.longitude]} icon={statusToIcon(r.status)}>
+                <Marker key={r.id} position={[r.latitude, r.longitude]} icon={statusToIcon(localStatus[r.id] || r.status)}>
                   <Popup>
                     <div className="text-xs space-y-1">
                       <div className="font-semibold text-slate-900">{r.message}</div>
@@ -473,10 +432,13 @@ export default function SOSRequestsPage() {
                   <span className="inline-block h-3 w-3 rounded-full bg-red-500" /> Pending
                 </span>
                 <span className="inline-flex items-center gap-2">
-                  <span className="inline-block h-3 w-3 rounded-full bg-yellow-400" /> In Progress
+                  <span className="inline-block h-3 w-3 rounded-full bg-yellow-400" /> Handling
                 </span>
                 <span className="inline-flex items-center gap-2">
-                  <span className="inline-block h-3 w-3 rounded-full bg-green-500" /> Resolved
+                  <span className="inline-block h-3 w-3 rounded-full bg-green-500" /> Completed
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-block h-3 w-3 rounded-full bg-blue-500" /> Cancelled
                 </span>
               </div>
             </div>
@@ -485,12 +447,12 @@ export default function SOSRequestsPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-1">{disasterIcon("FLOOD")} Flood</span>
                 <span className="inline-flex items-center gap-1">{disasterIcon("EARTHQUAKE")} Earthquake</span>
-                <span className="inline-flex items-center gap-1">{disasterIcon("CYCLONE")} Cyclone</span>
-                <span className="inline-flex items-center gap-1">{disasterIcon("HEAT_WAVE")} Heat Wave</span>
-                <span className="inline-flex items-center gap-1">{disasterIcon("FIRE")} Fire</span>
                 <span className="inline-flex items-center gap-1">{disasterIcon("LANDSLIDE")} Landslide</span>
-                <span className="inline-flex items-center gap-1">{disasterIcon("STORM")} Storm</span>
-                <span className="inline-flex items-center gap-1">{disasterIcon("DROUGHT")} Drought</span>
+                <span className="inline-flex items-center gap-1">{disasterIcon("TSUNAMI")} Tsunami</span>
+                <span className="inline-flex items-center gap-1">{disasterIcon("WILDFIRE")} Wildfire</span>
+                <span className="inline-flex items-center gap-1">{disasterIcon("TORNADO")} Tornado</span>
+                <span className="inline-flex items-center gap-1">{disasterIcon("SINKHOLE")} Sinkhole</span>
+                <span className="inline-flex items-center gap-1">{disasterIcon("BLIZZARD")} Blizzard</span>
               </div>
             </div>
           </div>
@@ -513,26 +475,18 @@ export default function SOSRequestsPage() {
                     <YAxis dataKey="name" type="category" width={100} tick={{ fill: "#cbd5e1", fontSize: 12 }} />
                     <Tooltip
                       contentStyle={{ background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", fontSize: 12 }}
-                      formatter={(v, n, p) => [`${v} (${p.payload.pct}%)`, p.payload.name]}
+                      itemStyle={{ color: "#ffffff" }}
+                      formatter={(value, name, props) => {
+                        const count = statusBarData.find((s) => s.name === props.payload.name)?.count || 0;
+                        return [`Count: ${count} (${props.payload.pct}%)`, props.payload.name];
+                      }}
                     />
-                    <Bar
-                      dataKey="count"
-                      radius={[4, 4, 4, 4]}
-                      background={{ fill: "#0f172a" }}
-                      cursor="pointer"
-                      onClick={(d) => setFilterStatus(d.name)}
-                    >
+
+                    <Bar dataKey="pct" radius={[4, 4, 4, 4]} background={{ fill: "#0f172a" }} cursor="pointer">
                       {statusBarData.map((entry, index) => {
                         const base = barColorForStatus(entry.name);
                         const isActive = statusFilter === entry.name;
-                        return (
-                          <Cell
-                            key={`cell-s-${index}`}
-                            fill={isActive ? base : shade(base, hoverStatus === entry.name ? 1.0 : 0.75)}
-                            onMouseEnter={() => setHoverStatus(entry.name)}
-                            onMouseLeave={() => setHoverStatus(null)}
-                          />
-                        );
+                        return <Cell key={index} fill={isActive ? base : shade(base, hoverStatus === entry.name ? 1.0 : 0.75)} />;
                       })}
                     </Bar>
                   </BarChart>
@@ -561,6 +515,7 @@ export default function SOSRequestsPage() {
                     <YAxis tick={{ fill: "#cbd5e1", fontSize: 12 }} />
                     <Tooltip
                       contentStyle={{ background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", fontSize: 12 }}
+                      itemStyle={{ color: "#ffffff" }}
                       formatter={(v, n, p) => [`${v} (${p.payload.pct}%)`, p.payload.name]}
                     />
                     <Bar
@@ -653,13 +608,29 @@ export default function SOSRequestsPage() {
                     <span className={`${riskBadge(r.dangerLevel)} mt-1`}>{r.dangerLevel !== "N/A" ? `${r.dangerLevel} RISK` : "No Zone"}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={statusBadge(r.status)}>{r.status}</span>
+                    <span className={statusBadge(localStatus[r.id] || r.status)}>{localStatus[r.id] || r.status}</span>
+
                     <select
-                      value={r.status}
-                      onChange={(e) => updateStatus(r.id, e.target.value)}
+                      value={localStatus[r.id] || r.status}
+                      onChange={async (e) => {
+                        if (!isAdmin) {
+                          toast.error("Only admin can update status");
+                          return;
+                        }
+                        const nextStatus = e.target.value;
+
+                        // Optimistic UI
+                        setLocalStatus((prev) => ({ ...prev, [r.id]: nextStatus }));
+
+                        // Call backend
+                        const result = await dispatch(udpateSosStatus({ sosId: r.id, status: nextStatus }));
+
+                        setLocalStatus((prev) => ({ ...prev, [r.id]: r.status }));
+                        dispatch(getEveryoneSos());
+                      }}
                       className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200 hover:bg-slate-800"
                     >
-                      {["PENDING", "IN_PROGRESS", "RESOLVED"].map((s) => (
+                      {["PENDING", "HANDLING", "COMPLETED", "CANCELLED"].map((s) => (
                         <option key={s} value={s}>
                           {s}
                         </option>

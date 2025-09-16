@@ -4,7 +4,7 @@ import DashboardPage from "./pages/DashboardPage.jsx";
 import DisasterZonesPage from "./pages/DisasterZonesPage.jsx";
 import ZonesDetailsPage from "./pages/ZonesDetailsPage.jsx";
 import Navbar from "./components/Navbar.jsx";
-import SOSRequestsPage from "./pages/SOSRequestsPage.jsx";
+import SOSRequestsPage from "./pages/SOSRequest/SOSRequestsPage.jsx";
 import Auth from "./pages/auth/Auth";
 import { useDispatch, useSelector } from "react-redux";
 import { isTokenValid } from "./Redux/Auth/isTokenValid.js";

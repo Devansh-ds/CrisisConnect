@@ -1,7 +1,7 @@
 package com.devansh.request;
 
 import com.devansh.model.enums.DisasterType;
-import lombok.Builder;
+
 import lombok.Data;
 
 import java.math.BigDecimal;

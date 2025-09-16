@@ -1,11 +1,16 @@
-import React, { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Circle, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
 import { AlertTriangle, MapPin, Shield, Info, Droplets, Flame, Wind, Zap, CloudRain, Mountain, ArrowLeft } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 // Fix for default markers in react-leaflet
 import L from "leaflet";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentActiveZone } from "../Redux/DisasterZone/Action";
+import { toast } from "sonner";
+import { getSosByZone } from "../Redux/SOS/Action";
+import { getSafetyTips } from "../Redux/SafetyTips/Action";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
@@ -17,363 +22,70 @@ const ZonesDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const zoneId = parseInt(id);
+  const dispatch = useDispatch();
+  const disasterStore = useSelector((store) => store.disasterStore);
+  const sosStore = useSelector((store) => store.sosStore);
+  const safetyTipsStore = useSelector((store) => store.safetyTipsStore);
 
-  // Sample zone data with extensive examples
-  const sampleZones = [
-    {
-      id: 1,
-      name: "Mumbai Flood Zone Updated",
-      disasterType: "FLOOD",
-      dangerLevel: "HIGH",
-      centerLatitude: 19.08,
-      centerLongitude: 72.88,
-      radius: 20,
-    },
-    {
-      id: 2,
-      name: "Delhi Earthquake Zone",
-      disasterType: "EARTHQUAKE",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 28.61,
-      centerLongitude: 77.21,
-      radius: 15,
-    },
-    { id: 3, name: "Chennai Cyclone Zone", disasterType: "CYCLONE", dangerLevel: "HIGH", centerLatitude: 13.08, centerLongitude: 80.27, radius: 25 },
-    {
-      id: 4,
-      name: "Kolkata Heat Wave Zone",
-      disasterType: "HEAT_WAVE",
-      dangerLevel: "MEDIUM",
-      centerLatitude: 22.57,
-      centerLongitude: 88.36,
-      radius: 18,
-    },
-    {
-      id: 5,
-      name: "Bangalore Landslide Zone",
-      disasterType: "LANDSLIDE",
-      dangerLevel: "LOW",
-      centerLatitude: 12.97,
-      centerLongitude: 77.59,
-      radius: 12,
-    },
-    { id: 6, name: "Pune Fire Zone", disasterType: "FIRE", dangerLevel: "HIGH", centerLatitude: 18.52, centerLongitude: 73.86, radius: 8 },
-    { id: 7, name: "Hyderabad Storm Zone", disasterType: "STORM", dangerLevel: "MEDIUM", centerLatitude: 17.38, centerLongitude: 78.47, radius: 22 },
-    { id: 8, name: "Ahmedabad Drought Zone", disasterType: "DROUGHT", dangerLevel: "LOW", centerLatitude: 23.02, centerLongitude: 72.57, radius: 30 },
-  ];
+  useEffect(() => {
+    dispatch(getCurrentActiveZone(zoneId)).then(() => {
+      if (disasterStore?.currentZoneError !== null) {
+        toast.error("Failed to fetch zone. Try again later");
+      }
+    });
+  }, [zoneId, dispatch]);
 
   // Sample safety tips with extensive data
-  const sampleTips = [
-    {
-      id: 1,
-      title: "Mumbai Flood Awareness",
-      description: "Avoid low-lying areas during monsoon. Keep emergency supplies ready.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 2,
-      title: "Mumbai Local Transport",
-      description: "Do not use local trains during flooding. Use elevated roads.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 3,
-      title: "Mumbai Building Safety",
-      description: "Check building drainage systems regularly. Avoid basement parking.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 15,
-      title: "Mumbai Flood Emergency Kit",
-      description: "Prepare a 72-hour emergency kit with water, food, flashlight, and first aid.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 16,
-      title: "Mumbai Safe Evacuation Routes",
-      description: "Know multiple evacuation routes from your home and workplace.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 17,
-      title: "Mumbai Electrical Safety",
-      description: "Turn off electricity in flooded areas. Avoid using electrical appliances during floods.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 18,
-      title: "Mumbai Pet Safety",
-      description: "Include pets in your emergency plan. Keep pet supplies ready.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 19,
-      title: "Mumbai Stay Informed",
-      description: "Keep a battery-powered radio to receive local alerts and flood updates.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
-    {
-      id: 20,
-      title: "Mumbai Vehicle Safety",
-      description: "Avoid driving in flooded areas. Park vehicles on higher ground.",
-      disasterType: "FLOOD",
-      disasterZoneId: 1,
-    },
+  useEffect(() => {
+    dispatch(getSafetyTips(zoneId)).then(() => {
+      if (safetyTipsStore?.safetyTipsError !== null) {
+        toast.error("Could not load safety Tips.");
+      }
+    });
+  }, [zoneId, dispatch]);
 
-    {
-      id: 4,
-      title: "Delhi Earthquake Preparedness",
-      description: "Secure heavy furniture. Keep emergency kit ready with first aid supplies.",
-      disasterType: "EARTHQUAKE",
-      disasterZoneId: 2,
-    },
-    {
-      id: 5,
-      title: "Delhi Building Safety",
-      description: "Identify safe spots in your home. Practice drop, cover, and hold drills.",
-      disasterType: "EARTHQUAKE",
-      disasterZoneId: 2,
-    },
-    {
-      id: 6,
-      title: "Chennai Cyclone Evacuation",
-      description: "Follow evacuation orders immediately. Move to designated shelters.",
-      disasterType: "CYCLONE",
-      disasterZoneId: 3,
-    },
-    {
-      id: 7,
-      title: "Chennai Coastal Safety",
-      description: "Avoid coastal areas during cyclone warnings. Secure boats and fishing equipment.",
-      disasterType: "CYCLONE",
-      disasterZoneId: 3,
-    },
-    {
-      id: 8,
-      title: "Kolkata Heat Protection",
-      description: "Stay indoors during peak hours (11 AM - 4 PM). Use fans and coolers.",
-      disasterType: "HEAT_WAVE",
-      disasterZoneId: 4,
-    },
-    {
-      id: 9,
-      title: "Kolkata Hydration Tips",
-      description: "Drink plenty of water. Avoid alcohol and caffeine during heat waves.",
-      disasterType: "HEAT_WAVE",
-      disasterZoneId: 4,
-    },
-    {
-      id: 10,
-      title: "Bangalore Landslide Prevention",
-      description: "Avoid construction on steep slopes. Monitor soil erosion signs.",
-      disasterType: "LANDSLIDE",
-      disasterZoneId: 5,
-    },
-    {
-      id: 11,
-      title: "Pune Fire Safety",
-      description: "Install smoke detectors. Keep fire extinguishers accessible.",
-      disasterType: "FIRE",
-      disasterZoneId: 6,
-    },
-    {
-      id: 12,
-      title: "Pune Emergency Contacts",
-      description: "Keep fire department number (101) handy. Know nearest fire station location.",
-      disasterType: "FIRE",
-      disasterZoneId: 6,
-    },
-    {
-      id: 13,
-      title: "Hyderabad Storm Safety",
-      description: "Stay away from windows during storms. Avoid using electrical appliances.",
-      disasterType: "STORM",
-      disasterZoneId: 7,
-    },
-    {
-      id: 14,
-      title: "Ahmedabad Water Conservation",
-      description: "Implement rainwater harvesting. Use water-efficient appliances.",
-      disasterType: "DROUGHT",
-      disasterZoneId: 8,
-    },
+  // Sample SOS requests
+  useEffect(() => {
+    dispatch(getSosByZone(zoneId)).then(() => {
+      if (sosStore?.zoneSosError !== null) {
+        toast.error("Failed to fetch sos requests. Try again later");
+      }
+    });
+  }, [zoneId, dispatch]);
 
-    {
-      id: 101,
-      title: "Flood Readiness Kit",
-      description: "Pack waterproof bags, battery power bank, and dry snacks.",
-      disasterType: "FLOOD",
-      disasterZoneId: null,
-    },
-    {
-      id: 102,
-      title: "Avoid Water Currents",
-      description: "Do not walk or drive through floodwaters; 15cm can knock you down.",
-      disasterType: "FLOOD",
-      disasterZoneId: null,
-    },
-    {
-      id: 201,
-      title: "Drop, Cover, Hold",
-      description: "Practice earthquake drills monthly with your family.",
-      disasterType: "EARTHQUAKE",
-      disasterZoneId: null,
-    },
-    {
-      id: 202,
-      title: "Secure Heavy Items",
-      description: "Anchor shelves and appliances to wall studs.",
-      disasterType: "EARTHQUAKE",
-      disasterZoneId: null,
-    },
-    {
-      id: 301,
-      title: "Cyclone Updates",
-      description: "Track IMD advisories and prepare to evacuate early.",
-      disasterType: "CYCLONE",
-      disasterZoneId: null,
-    },
-    {
-      id: 302,
-      title: "Trim Loose Branches",
-      description: "Reduce debris risks by pruning weak trees.",
-      disasterType: "CYCLONE",
-      disasterZoneId: null,
-    },
-    {
-      id: 401,
-      title: "Heat Wave Hydration",
-      description: "Drink water every 20 minutes; avoid outdoor work at noon.",
-      disasterType: "HEAT_WAVE",
-      disasterZoneId: null,
-    },
-    {
-      id: 402,
-      title: "Cool Rooms",
-      description: "Use curtains and cross-ventilation to keep rooms cool.",
-      disasterType: "HEAT_WAVE",
-      disasterZoneId: null,
-    },
-    {
-      id: 501,
-      title: "Landslide Awareness",
-      description: "Identify cracks, leaning trees, and listen for unusual rumbling.",
-      disasterType: "LANDSLIDE",
-      disasterZoneId: null,
-    },
-    {
-      id: 502,
-      title: "Slope Drainage",
-      description: "Keep hillside drainage channels clear of debris.",
-      disasterType: "LANDSLIDE",
-      disasterZoneId: null,
-    },
-    {
-      id: 601,
-      title: "Home Fire Plan",
-      description: "Create two exit routes from every room and practice at night.",
-      disasterType: "FIRE",
-      disasterZoneId: null,
-    },
-    {
-      id: 602,
-      title: "Electrical Safety",
-      description: "Avoid overloading sockets; use surge protectors.",
-      disasterType: "FIRE",
-      disasterZoneId: null,
-    },
-    {
-      id: 701,
-      title: "Storm Shelter Items",
-      description: "Keep torches, radio, and spare batteries ready.",
-      disasterType: "STORM",
-      disasterZoneId: null,
-    },
-    { id: 702, title: "Secure Loose Objects", description: "Bring in outdoor furniture before storms.", disasterType: "STORM", disasterZoneId: null },
-    {
-      id: 801,
-      title: "Drought Conservation",
-      description: "Fix leaks and use low-flow taps and showerheads.",
-      disasterType: "DROUGHT",
-      disasterZoneId: null,
-    },
-    {
-      id: 802,
-      title: "Irrigation Timing",
-      description: "Water plants early morning or evening to reduce evaporation.",
-      disasterType: "DROUGHT",
-      disasterZoneId: null,
-    },
-  ];
-
-  // Sample SOS requests (placeholder data)
-  const sampleSosRequests = [
-    {
-      id: 1,
-      message: "Water entering ground floor, need assistance",
-      latitude: 19.0815,
-      longitude: 72.879,
-      sosStatus: "PENDING",
-      updatedAt: "2025-09-08T14:02:01.266Z",
-      disasterZoneDto: { id: 1 },
-    },
-    {
-      id: 2,
-      message: "Elderly stuck, require boat rescue",
-      latitude: 19.077,
-      longitude: 72.8825,
-      sosStatus: "ACKNOWLEDGED",
-      updatedAt: "2025-09-08T14:20:00.000Z",
-      disasterZoneDto: { id: 1 },
-    },
-    {
-      id: 3,
-      message: "Electrical short risk in basement parking",
-      latitude: 19.085,
-      longitude: 72.874,
-      sosStatus: "PENDING",
-      updatedAt: "2025-09-08T14:35:00.000Z",
-      disasterZoneDto: { id: 1 },
-    },
-    {
-      id: 4,
-      message: "Road block due to fallen tree",
-      latitude: 13.085,
-      longitude: 80.271,
-      sosStatus: "RESOLVED",
-      updatedAt: "2025-09-09T09:10:00.000Z",
-      disasterZoneDto: { id: 3 },
-    },
-  ];
+  const sosRequests = sosStore?.zoneSos || [];
 
   // Local state for SOS to allow status updates
-  const [allSos, setAllSos] = useState(sampleSosRequests);
+  const [allSos, setAllSos] = useState(sosRequests);
 
   // Find the current zone or use default
-  const currentZone = sampleZones.find((zone) => zone.id === zoneId) || sampleZones[0];
+  const currentZone = disasterStore?.currentZone || {
+    id: zoneId,
+    name: "Mumbai Flood Zone Updated",
+    disasterType: "FLOOD",
+    dangerLevel: "HIGH",
+    centerLatitude: 19.08,
+    centerLongitude: 72.88,
+    radius: 20,
+  };
+
+  const sampleTips = safetyTipsStore?.safetyTips || [];
 
   // Tips filters
-  const localTips = sampleTips.filter((t) => t.disasterZoneId === zoneId && t.disasterType === currentZone.disasterType);
-  const generalTips = sampleTips.filter((t) => t.disasterZoneId === null && t.disasterType === currentZone.disasterType);
+  const localTips = useMemo(() => sampleTips.filter((t) => t?.disasterZoneDto !== null), [sampleTips, zoneId, currentZone?.disasterType]);
 
-  // SOS for current zone
-  const sosRequests = useMemo(() => allSos.filter((s) => s.disasterZoneDto?.id === currentZone.id), [allSos, currentZone.id]);
+  const generalTips = useMemo(() => sampleTips.filter((t) => t?.disasterZoneDto === null), [sampleTips, currentZone?.disasterType, zoneId]);
 
   // Pagination for tips (3 per page)
   const pageSize = 3;
   const [localPage, setLocalPage] = useState(1);
   const [generalPage, setGeneralPage] = useState(1);
+
   const localTotalPages = Math.max(1, Math.ceil(localTips.length / pageSize));
   const generalTotalPages = Math.max(1, Math.ceil(generalTips.length / pageSize));
+
   const paginatedLocalTips = useMemo(() => localTips.slice((localPage - 1) * pageSize, localPage * pageSize), [localTips, localPage]);
+
   const paginatedGeneralTips = useMemo(() => generalTips.slice((generalPage - 1) * pageSize, generalPage * pageSize), [generalTips, generalPage]);
 
   // Icons
@@ -383,18 +95,18 @@ const ZonesDetailsPage = () => {
         return <Droplets className="w-5 h-5 text-blue-400" />;
       case "EARTHQUAKE":
         return <Mountain className="w-5 h-5 text-orange-400" />;
-      case "CYCLONE":
-        return <Wind className="w-5 h-5 text-purple-400" />;
-      case "HEAT_WAVE":
-        return <Zap className="w-5 h-5 text-yellow-400" />;
       case "LANDSLIDE":
         return <Mountain className="w-5 h-5 text-amber-400" />;
-      case "FIRE":
-        return <Flame className="w-5 h-5 text-red-400" />;
-      case "STORM":
-        return <CloudRain className="w-5 h-5 text-indigo-400" />;
-      case "DROUGHT":
-        return <Droplets className="w-5 h-5 text-cyan-400" />;
+      case "TORNADO":
+        return <Wind className="w-5 h-5 text-purple-400" />;
+      case "SINKHOLE":
+        return <AlertTriangle className="w-5 h-5 text-pink-400" />;
+      case "TSUNAMI":
+        return <Droplets className="w-5 h-5 text-indigo-400" />;
+      case "WILDFIRE":
+        return <Flame className="w-5 h-5 text-red-500" />;
+      case "BLIZZARD":
+        return <CloudRain className="w-5 h-5 text-cyan-200" />; // ❄️ closest available
       default:
         return <AlertTriangle className="w-5 h-5 text-slate-300" />;
     }
@@ -412,25 +124,24 @@ const ZonesDetailsPage = () => {
         return "bg-slate-800 text-slate-300 ring-slate-700";
     }
   };
-
   const getDisasterBorderColor = (type) => {
     switch (type) {
       case "FLOOD":
         return "border-blue-400";
-      case "FIRE":
-        return "border-red-400";
       case "EARTHQUAKE":
         return "border-orange-400";
-      case "CYCLONE":
-        return "border-purple-400";
-      case "STORM":
-        return "border-indigo-400";
-      case "HEAT_WAVE":
-        return "border-yellow-400";
       case "LANDSLIDE":
         return "border-amber-400";
-      case "DROUGHT":
-        return "border-cyan-400";
+      case "TORNADO":
+        return "border-purple-400";
+      case "SINKHOLE":
+        return "border-pink-400";
+      case "TSUNAMI":
+        return "border-indigo-400";
+      case "WILDFIRE":
+        return "border-red-500";
+      case "BLIZZARD":
+        return "border-cyan-200"; // icy/snowy look
       default:
         return "border-slate-400";
     }
@@ -505,6 +216,14 @@ const ZonesDetailsPage = () => {
     setAllSos((prev) => prev.map((s) => (s.id === id ? { ...s, sosStatus: next, updatedAt: new Date().toISOString() } : s)));
   };
 
+  function MapUpdater({ center }) {
+    const map = useMap();
+    if (center) {
+      map.setView(center, 11); // update view when center changes
+    }
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 p-6">
       <div className="w-full rounded-2xl shadow-lg border border-slate-800 bg-slate-900 p-6">
@@ -524,10 +243,10 @@ const ZonesDetailsPage = () => {
                 <h1 className="text-slate-100 text-2xl font-bold">{currentZone.name}</h1>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-slate-300 text-lg font-semibold capitalize">{currentZone.disasterType.replace("_", " ")}</span>
+                <span className="text-slate-300 text-lg font-semibold capitalize">{currentZone?.disasterType?.replace("_", " ")}</span>
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${getDangerBadgeStyle(
-                    currentZone.dangerLevel
+                    currentZone?.dangerLevel
                   )}`}
                 >
                   {currentZone.dangerLevel} RISK
@@ -537,7 +256,7 @@ const ZonesDetailsPage = () => {
             <div className="flex items-center space-x-2 text-slate-400">
               <MapPin className="w-5 h-5" />
               <span className="text-sm">
-                {currentZone.centerLatitude.toFixed(4)}, {currentZone.centerLongitude.toFixed(4)}
+                {currentZone?.centerLatitude?.toFixed(4)}, {currentZone?.centerLongitude?.toFixed(4)}
               </span>
             </div>
           </div>
@@ -557,6 +276,7 @@ const ZonesDetailsPage = () => {
               style={{ height: "100%", width: "100%" }}
               className="rounded-xl"
             >
+              <MapUpdater center={[currentZone.centerLatitude, currentZone.centerLongitude]} />
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
               <Marker position={[currentZone.centerLatitude, currentZone.centerLongitude]}>
                 <Popup>
@@ -576,6 +296,7 @@ const ZonesDetailsPage = () => {
                   fillOpacity: 0.2,
                 }}
               />
+
               {/* SOS markers */}
               {sosRequests.map((s) => (
                 <Marker
@@ -617,6 +338,12 @@ const ZonesDetailsPage = () => {
               Local Safety Tips
             </h2>
             <div className="space-y-4">
+              {localTips.length === 0 && (
+                <div className="text-center mt-17 text-amber-500 text-lg">
+                  <p>No Zone specific safety tips are present.</p>
+                  <p>Find the nearest shelter and wait for rescue.</p>
+                </div>
+              )}
               {paginatedLocalTips.map((tip) => (
                 <div
                   key={tip.id}
@@ -635,7 +362,7 @@ const ZonesDetailsPage = () => {
               ))}
             </div>
             <div className="mt-auto">
-              <Pagination current={localPage} total={localTotalPages} onChange={setLocalPage} />
+              {localTips.length > 3 && <Pagination current={localPage} total={localTotalPages} onChange={setLocalPage} />}
             </div>
           </div>
 
@@ -646,6 +373,12 @@ const ZonesDetailsPage = () => {
               General Safety Tips
             </h2>
             <div className="space-y-4">
+              {generalTips.length === 0 && (
+                <div className="text-center mt-17 text-amber-500 text-lg">
+                  <p>No General safety tips are present.</p>
+                  <p>Find the nearest shelter and wait for rescue.</p>
+                </div>
+              )}
               {paginatedGeneralTips.map((tip) => (
                 <div
                   key={tip.id}
@@ -666,7 +399,7 @@ const ZonesDetailsPage = () => {
               ))}
             </div>
             <div className="mt-auto">
-              <Pagination current={generalPage} total={generalTotalPages} onChange={setGeneralPage} />
+              {generalTips.length > 3 && <Pagination current={generalPage} total={generalTotalPages} onChange={setGeneralPage} />}
             </div>
           </div>
         </div>
@@ -678,7 +411,10 @@ const ZonesDetailsPage = () => {
               <AlertTriangle className="w-6 h-6 mr-3 text-red-400" />
               SOS Requests
             </h2>
-            <button className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-indigo-700">
+            <button
+              onClick={() => navigate("/sos")}
+              className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-indigo-700"
+            >
               View All SOS Requests
             </button>
           </div>

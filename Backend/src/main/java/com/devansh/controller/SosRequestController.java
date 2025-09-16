@@ -60,7 +60,7 @@ public class SosRequestController {
     }
 
     @PutMapping("/admin/sos/{sosId}/status")
-    public ResponseEntity<SosRequestDto> updateSosStatus(@PathVariable Integer sosId, @RequestParam SosStatus status) {
+    public ResponseEntity<SosRequestDto> updateSosStatus(@PathVariable Integer sosId, @RequestParam Sostatus status) {
         return ResponseEntity.ok(sosRequestService.updateSosStatus(sosId, status));
     }
 

@@ -7,6 +7,7 @@ import { Plus, X, Pencil, Trash2, Map as MapIcon, Filter, ChevronLeft, ChevronRi
 import { useDispatch, useSelector } from "react-redux";
 import { createDisasterZone, deleteDisasterZone, getAllDisasterZones, udpateDisasterZone } from "../Redux/DisasterZone/Action.js";
 import { toast } from "sonner";
+import RestrictedButton from "../components/RestrictedButton.jsx";
 
 // Ensure Leaflet default marker icons render in bundlers
 function useLeafletDefaultIcon() {
@@ -587,9 +588,12 @@ function DisasterZonesPage() {
               >
                 Cancel
               </button>
-              <button onClick={handleUpdate} className="rounded-md bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700">
+              <RestrictedButton
+                onClick={handleUpdate}
+                className="rounded-md bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700"
+              >
                 Update
-              </button>
+              </RestrictedButton>
             </>
           }
         >
@@ -671,13 +675,13 @@ function DisasterZonesPage() {
               >
                 Cancel
               </button>
-              <button
+              <RestrictedButton
                 disabled={disasterStore?.deleteZoneLoading}
                 onClick={handleDelete}
                 className="rounded-md bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700"
               >
                 {disasterStore?.deleteZoneLoading ? "Processing" : "Confirm"}
-              </button>
+              </RestrictedButton>
             </>
           }
         >

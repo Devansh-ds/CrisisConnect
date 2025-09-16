@@ -3,6 +3,9 @@ import {
   CREATE_ZONE_FAILURE,
   CREATE_ZONE_REQUEST,
   CREATE_ZONE_SUCCESS,
+  CURRENT_ZONE_FAILURE,
+  CURRENT_ZONE_REQUEST,
+  CURRENT_ZONE_SUCCESS,
   DELETE_ZONE_FAILURE,
   DELETE_ZONE_REQEUST,
   DELETE_ZONE_SUCCESS,
@@ -25,7 +28,12 @@ export const getAllDisasterZones = () => async (dispatch) => {
       },
     });
 
-    const resData = await res.json();
+    let resData;
+    try {
+      resData = await res.json();
+    } catch {
+      resData = {};
+    }
 
     if (!res.ok) {
       dispatch({ type: GET_ALL_ZONES_FAILURE, payload: resData });
@@ -55,7 +63,12 @@ export const createDisasterZone = (zoneData) => async (dispatch) => {
       body: JSON.stringify(zoneData),
     });
 
-    const resData = await res.json();
+    let resData;
+    try {
+      resData = await res.json();
+    } catch {
+      resData = {};
+    }
 
     if (!res.ok) {
       dispatch({ type: CREATE_ZONE_FAILURE, payload: resData });
@@ -87,7 +100,12 @@ export const udpateDisasterZone =
         body: JSON.stringify(zoneData),
       });
 
-      const resData = await res.json();
+      let resData;
+      try {
+        resData = await res.json();
+      } catch {
+        resData = {};
+      }
 
       if (!res.ok) {
         dispatch({ type: UPDATE_ZONE_FAILURE, payload: resData });
@@ -115,7 +133,12 @@ export const deleteDisasterZone = (id) => async (dispatch) => {
       },
     });
 
-    const resData = await res.json();
+    let resData;
+    try {
+      resData = await res.json();
+    } catch {
+      resData = {};
+    }
 
     if (!res.ok) {
       dispatch({ type: DELETE_ZONE_FAILURE, payload: resData });
@@ -129,5 +152,39 @@ export const deleteDisasterZone = (id) => async (dispatch) => {
   } catch (error) {
     console.log("Delete disaster zone (error): ", error);
     dispatch({ type: DELETE_ZONE_FAILURE, payload: "Something went wrong!" });
+  }
+};
+
+export const getCurrentActiveZone = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: CURRENT_ZONE_REQUEST });
+
+    const res = await fetch(`${BASE_URL}/zones/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+
+    let resData;
+    try {
+      resData = await res.json();
+    } catch {
+      resData = {};
+    }
+    console.log("Current active zone: ", resData);
+    
+    if (!res.ok) {
+      dispatch({ type: CURRENT_ZONE_FAILURE, payload: resData });
+      return;
+    }
+
+    dispatch({
+      type: CURRENT_ZONE_SUCCESS,
+      payload: resData,
+    });
+  } catch (error) {
+    console.log("current active zone (error): ", error);
+    dispatch({ type: CURRENT_ZONE_FAILURE, payload: "Something went wrong!" });
   }
 };
