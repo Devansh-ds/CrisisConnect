@@ -134,10 +134,3 @@ Contributions are welcome! Please open an issue or PR for improvements.
 
 ---
 
-## Author
-
-👤 **Devansh Singla**
-
-- Email: Devanshsingla9@gmail.com
-- [LinkedIn](https://www.linkedin.com/in/devansh-ds/)
-- [Github](https://github.com/Devansh-ds)
